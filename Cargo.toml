@@ -1,0 +1,45 @@
+[package]
+name = "nswindow"
+version = "0.0.0"
+edition = "2021"
+authors = ["NickelAnge.Studio <rust@nickelange.studio>"]
+description = "Nifty and Simple Windows allow easy opening and manipulation of system windows.."
+license = "MIT"
+repository = "https://github.com/NickelAngeStudio/srml"
+keywords = ["window", "frame", "win", "surface", "view"]
+categories = ["multimedia", "game-development"]
+readme = "README.md"
+
+# List of excluded files
+exclude = [
+    "target/*",
+    "diag/*",
+    "img/*",
+    "tests/*",
+    ".git/*",
+    ".vscode/*",
+    ".cargo/*",
+    ".github/*",
+    ".gitignore",
+]
+
+[features]
+
+# Window thread will be locked until an event occurred. Better for RETAINED gui and non multimedia application.
+nswindow_application = []
+
+[dependencies]
+nscfg = "1.0.0"
+
+
+[build-dependencies]
+bindgen = "0.69.4"
+nscfg = "1.0.0"
+
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[profile.test]
+opt-level = 3
