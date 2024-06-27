@@ -28,8 +28,9 @@ use nscfg::{match_cfg, target_cfg};
 use crate::{display::{Desktop, Displays}, NSWindowError, Window, WindowBuilder, WindowHandle, WindowManagerEvent};
 
 
-/// [WindowManager] is used to create and manipulate windows.
-/// TODO: Develop more
+/// [WindowManager] is used to create and manipulate [Window].
+/// 
+/// It is also used to fetch [WindowManagerEvent], get [Desktop] and [Displays] informations.
 pub struct WindowManager {
     /// Linux [WindowManager] abstraction for calls.
     #[cfg(target_os = "linux")]
@@ -38,6 +39,7 @@ pub struct WindowManager {
 
 impl WindowManager {
 
+    /// Create a new window manager used to create [Window], fetch [WindowManagerEvent], get [Desktop] and [Displays] informations.
     pub fn new() -> Result<WindowManager, crate::NSWindowError> {
 
         match_cfg! {
@@ -58,7 +60,7 @@ impl WindowManager {
     }
 
     target_cfg! {
-        linux => {
+        linux & !doc => {
             /// Create a new x11 [WindowManager].
             pub fn new_x11() -> Result<WindowManager, crate::NSWindowError> {
                 if super::linux::x11::x11_supported() {
@@ -88,8 +90,8 @@ impl WindowManager {
     /// 
     /// Returns Some(WindowManagerEvent) if any, [Option::None] if no event.
     /// 
-    /// # Application feature
-    /// If the feature `nswnd_application` is enabled, [Option::None] will never
+    /// # Note
+    /// If the feature `nswindow_application` is enabled, [Option::None] will never
     /// be returned and the request will lock until an event occurred.
     #[inline(always)]
     pub fn event(&self) -> Option<WindowManagerEvent> {

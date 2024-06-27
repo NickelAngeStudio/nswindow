@@ -27,7 +27,7 @@ SOFTWARE.
 // Used to generate target tags in doc.
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-//! Nifty Simple Window has no statics.
+//! Nifty and Simple Window provides easy to use structs and objects to easily create window on the supported platform of your choice.
 
 
 target_cfg! {
