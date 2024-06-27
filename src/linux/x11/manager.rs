@@ -69,7 +69,7 @@ impl X11WindowManager {
             let display = XOpenDisplay(std::ptr::null());
             let atoms = X11Atoms::new(display);
 
-            match super::screen::x11Screens() {
+            match super::display::x11Displays() {
                 Ok(screens) => Ok(X11WindowManager { 
                     event,
                     queue : Vec::new(), 

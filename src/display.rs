@@ -54,10 +54,10 @@ pub struct DisplaySize {
 #[derive(Debug, PartialEq, Clone)]
 pub struct DisplayDesktopPosition {
     /// X position of the display.
-    x : i32,
+    pub x : i32,
 
     /// Y position of the display.
-    y : i32
+    pub y : i32
 }
 
 /// Contains informations about the desktop.
@@ -146,14 +146,20 @@ pub struct DisplaySupportedResolution {
     /// Resolution supported by display
     pub resolution : DisplayResolution,
 
+    /// If true, resolution is interlaced and not progressive.
+    /// 
+    /// Reference(s)
+    /// https://en.wikipedia.org/wiki/Interlaced_video
+    pub interlaced : bool,
+
     /// Refresh rate supported in that resolution.
     pub refresh_rates : Vec<DisplayRefreshRate>,
 }
 
 impl DisplaySupportedResolution {
     /// Create a new [ScreenResolution] with fields.
-    pub fn new(resolution : DisplayResolution) -> DisplaySupportedResolution {
-        DisplaySupportedResolution { resolution, refresh_rates: Vec::new() }
+    pub fn new(resolution : DisplayResolution, interlaced : bool) -> DisplaySupportedResolution {
+        DisplaySupportedResolution { resolution, interlaced, refresh_rates: Vec::new() }
     }
 
     /// Add a supported refresh rate to resolution.
@@ -306,6 +312,7 @@ mod tests{
     fn create_supported(width : usize, height : usize, refreshs : Vec<DisplayRefreshRate>) -> DisplaySupportedResolution {
         DisplaySupportedResolution { 
             resolution: DisplayResolution { width, height }, 
+            interlaced : false,
             refresh_rates: refreshs }
     }
 

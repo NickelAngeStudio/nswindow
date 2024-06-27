@@ -40,7 +40,7 @@ pub(crate) mod manager;
 pub(crate) mod window;
 
 /// X11 Screen informations
-pub(crate) mod screen;
+pub(crate) mod display;
 
 /// X11 Atoms informations
 pub(crate) mod atom;

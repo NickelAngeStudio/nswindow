@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 /// Enumeration of possible nswindow errors.
+#[derive(Debug, PartialEq, Clone)]
 pub enum NSWindowError {
 
     // **********
