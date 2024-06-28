@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 
-use crate::{event::WindowManagerEvent, display::Displays, NSWindowError};
+use crate::{event::WindowManagerEvent, display::Displays, WindowError};
 
 use super::{atom::X11Atoms, Display, Window, XEvent, XOpenDisplay};
 
@@ -62,7 +62,7 @@ impl X11WindowManager {
     /// Create a new instance of X11WindowManager
     /// 
     /// Returns Ok(X11WindowManager) on success, Err(NSWindowError::ScreenInformationError) on error.
-    pub fn new() -> Result<X11WindowManager, NSWindowError> {
+    pub fn new() -> Result<X11WindowManager, WindowError> {
 
         unsafe {
             let event = XEvent { type_: 0 };

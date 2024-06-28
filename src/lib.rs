@@ -52,6 +52,10 @@ pub mod manager;
 #[doc(hidden)] 
 pub mod window;
 
+/// Window properties
+#[doc(hidden)] 
+pub mod property; 
+
 /// Window builder
 #[doc(hidden)] 
 pub mod builder;
@@ -67,7 +71,13 @@ pub mod event;
 pub use builder::WindowBuilder as WindowBuilder;
 pub use manager::WindowManager as WindowManager;
 pub use window::Window as Window;
-pub use error::NSWindowError as NSWindowError;
+pub use property::WindowKeyboardMode as WindowKeyboardMode;
+pub use property::WindowCursorMode as WindowCursorMode;
+pub use property::WindowFullScreenMode as WindowFullScreenMode;
+pub use property::WindowPosition as WindowPosition;
+pub use property::WindowRelativePosition as WindowRelativePosition;
+pub use property::WindowSize as WindowSize;
+pub use error::WindowError as WindowError;
 pub use event::WindowManagerEvent as WindowManagerEvent;
 
 /// Window handle used by the [WindowManager].

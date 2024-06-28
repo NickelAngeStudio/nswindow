@@ -25,12 +25,12 @@ SOFTWARE.
 
 use std::ptr::null_mut;
 
-use crate::{display::{self, Desktop, Display, DisplayDesktopPosition, DisplayRefreshRate, DisplayResolution, DisplaySize, DisplaySupportedResolution, Displays}, error::NSWindowError};
+use crate::{display::{self, Desktop, Display, DisplayDesktopPosition, DisplayRefreshRate, DisplayResolution, DisplaySize, DisplaySupportedResolution, Displays}, error::WindowError};
 
 //use super::Display;
 
 /// Get x11 Displays from xrandr
-pub(crate) fn x11Displays() -> Result<Displays, NSWindowError> {
+pub(crate) fn x11Displays() -> Result<Displays, WindowError> {
 
     use std::process::Command;
 
@@ -64,10 +64,10 @@ pub(crate) fn x11Displays() -> Result<Displays, NSWindowError> {
                     Ok(Displays::create(list, desktop))
              
                 },
-                Err(_) => Err(NSWindowError::DisplayInformationError),
+                Err(_) => Err(WindowError::DisplayInformationError),
             }
         },
-        Err(_) => Err(NSWindowError::DisplayInformationError),
+        Err(_) => Err(WindowError::DisplayInformationError),
     }
 }
 

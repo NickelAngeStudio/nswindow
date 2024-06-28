@@ -24,59 +24,10 @@ SOFTWARE.
 
 
 
-use crate::{ display::{Display, DisplayHandle}, NSWindowError, WindowHandle};
+use crate::{ display::{Display, DisplayHandle}, WindowError, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
 
  
-/// [Window] size as width and height.
- #[derive(Debug, PartialEq, Clone)]
-pub struct WindowSize {
-    pub width : u32,
-    pub height : u32,
-}
 
-/// [Window] position according to x and y axis.
-#[derive(Debug, PartialEq, Clone)]
-pub struct WindowPosition {
-    pub x : i32,
-    pub y : i32,
-}
-
-
-/// Enumeration of possible window positions when setting position.
-#[derive(Debug, PartialEq, Clone)]
-pub enum WindowRelativePosition {
-    /// Position window on desktop from an absolute pair of x,y coordinates.
-    Desktop(WindowPosition),
-
-    /// Position window on a specific display from an absolute pair of x,y coordinates.
-    Display(DisplayHandle, WindowPosition),
-
-    /// Position window in the center of given display.
-    DisplayCenter(DisplayHandle),
-
-    /// Position window relative to parent window. All [Window] have parent, up to the root which is the desktop.
-    Parent(WindowPosition),
-
-    /// Position window in the center of parent window. All [Window] have parent, up to the root which is the desktop.
-    ParentCenter,
-}
-
-/// [Window] fullscreen modes.
-#[derive(Debug, PartialEq, Clone)]
-pub enum WindowFullScreenMode {
-
-    /// Window will be set fullscreen in the current display this window belong to.
-    Current,
-
-    /// Window will be set fullscreen in the primary displat.
-    Primary,
-
-    /// Window will be set fullscreen for entire desktop which can be set across multiple display.
-    Desktop,
-
-    /// Window will be set fullscreen for the specified display
-    Display(DisplayHandle)
-}
 
 /// [Window] is used to manipulate an individual window.
 /// 
@@ -96,75 +47,63 @@ pub struct Window {
 
 impl Window {
 
+
+
     /// Get [WindowHandle].
-    fn handle(&self) -> WindowHandle {
+    pub fn handle(&self) -> WindowHandle {
         todo!()
     }
 
     /// Get [Window] title.
-    fn title(&self) -> &str {
+    pub fn title(&self) -> &str {
         todo!()
     }
 
     /// Set the [Window] title.
-    fn set_title(&mut self, title : &str) -> Result<bool, NSWindowError>{
+    pub fn set_title(&mut self, title : &str) -> Result<bool, WindowError>{
         todo!()
     }
 
     /// Get [WindowSize] of [Window].
-    fn size(&self) -> WindowSize {
+    pub fn size(&self) -> WindowSize {
         todo!()
     }
 
     /// Set [WindowSize] of [Window].
-    fn set_size(&mut self, size : WindowSize) -> Result<bool, NSWindowError> {
+    pub fn set_size(&mut self, size : WindowSize) -> Result<bool, WindowError> {
         todo!()
     }
 
-    /// Get [Window] height.
-    fn height(&self) -> u32 {
-        todo!()
-    }
-
-    /// Set [Window] height.
-    fn set_height(&mut self) -> Result<bool, NSWindowError> {
-        todo!()
-    }
-
-    /// Get [Window] width.
-    fn width(&self) -> u32 {
-        todo!()
-    }
-
-    /// Set [Window] width.
-    fn set_width(&mut self) -> Result<bool, NSWindowError> {
-        todo!()
-    }
-
-     /// Returns true if [Window] if visible (show() was called)wm
-     fn visible(&mut self) -> Result<bool, NSWindowError> {
+    /// Returns true if [Window] if visible (show() was called)wm
+    pub fn visible(&mut self) -> Result<bool, WindowError> {
         todo!()
     }
 
     /// Show the [Window] on display.
-    fn show(&mut self) -> Result<bool, NSWindowError> {
+    pub fn show(&mut self) -> Result<bool, WindowError> {
         todo!()
     }
 
+    /// Hide the [Window] on display.
+    pub fn hide(&mut self) -> Result<bool, WindowError> {
+        todo!()
+    }
+
+
     /// Close [Window], removing it from display.
-    fn close(&mut self) -> Result<bool, NSWindowError> {
+    pub fn close(&mut self) -> Result<bool, WindowError> {
         todo!()
     }
 
     /// Position of the [Window] on the desktop as [WindowPosition] tuple.
-    fn position(&mut self) -> WindowPosition {
+    pub fn position(&mut self) -> WindowPosition {
         todo!()
     }
 
     /// Set the position of the [Window] with a [WindowRelativePosition].
     /// 
-    /// Returns Ok([WindowPosition]) with the position on the desktop or [NSWindowError::WindowRelativePositionOOB] if position is invalid.
-    fn set_position(&mut self, position : WindowRelativePosition) -> Result<WindowPosition, NSWindowError> {
+    /// Returns Ok([WindowPosition]) with the position on the desktop or [WindowError::WindowRelativePositionOOB] if position is invalid.
+    pub fn set_position(&mut self, position : WindowRelativePosition) -> Result<WindowPosition, WindowError> {
         todo!()
     }
 
@@ -183,7 +122,7 @@ impl Window {
     //fn set_position_absolute;
 
     /// Returns true if [Window] has decoration.
-    fn decoration(&self) -> bool {
+    pub fn decoration(&self) -> bool {
         todo!()
     }
 

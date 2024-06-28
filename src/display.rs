@@ -150,7 +150,7 @@ pub struct DisplaySupportedResolution {
     /// If true, resolution is interlaced and not progressive.
     /// 
     /// Reference(s)
-    /// https://en.wikipedia.org/wiki/Interlaced_video
+    /// <https://en.wikipedia.org/wiki/Interlaced_video>
     pub interlaced : bool,
 
     /// Refresh rate supported in that resolution.

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::{window::{WindowFullScreenMode, WindowRelativePosition, WindowSize}, NSWindowError, Window, WindowHandle, WindowManager};
+use crate::{Window, WindowCursorMode, WindowError, WindowFullScreenMode, WindowHandle, WindowKeyboardMode, WindowManager, WindowRelativePosition, WindowSize};
 
 
 
@@ -37,21 +37,60 @@ pub struct WindowBuilder {
 
     parent : WindowHandle,
     
+    cursor_mode : WindowCursorMode,
 
+    cursor_visible : bool,
+
+    cursor_confined : bool, 
+
+    keyboard_mode : WindowKeyboardMode,
+
+    keyboard_autorepeat : bool,
 }
 
 impl WindowBuilder {
 
-     /// [Window] title of the new [Window].
-     fn title(&self, title : &str) -> &mut Self {
+    /// Create a new [WindowBuilder] instance.
+    pub fn new() -> WindowBuilder {
+        todo!()
+    }
+
+    /// [Window] cursor mode.
+    pub fn cursor_mode(&mut self, mode : WindowCursorMode) -> &mut Self {
+        todo!()
+    }
+
+    /// Toggle [Window] cursor visibility.
+    pub fn cursor_visible(&mut self, visible : bool) -> &mut Self {
+        todo!()
+    }
+
+    /// Toggle [Window] cursor confined within boundaries.
+    pub fn cursor_confined(&mut self, confined : bool) -> &mut Self {
+        todo!()
+    }
+
+    /// [Window] keyboard mode.
+    pub fn keyboard_mode(&mut self, mode : WindowKeyboardMode) -> &mut Self {
+        todo!()
+    }
+
+    /// Toggle [Window] keyboard auto repeat. Default : false
+    pub fn keyboard_autorepeat(&mut self, autorepeat : bool) -> &mut Self {
+        todo!()
+    }
+
+
+    /// [Window] title of the new [Window].
+    pub fn title(&mut self, title : &str) -> &mut Self {
         todo!()
     }
 
     /// [WindowHandle] of the parent of the new [Window].
     /// 
-    /// [WindowHandle] must be valid else building returns  [NSWindowError::InvalidWindowHandle].
-    /// [WindowHandle] can't be the [Window] itself else building returns [NSWindowError::WindowParentSelf].
-    /// [WindowHandle] can't create a parent loop else building returns [NSWindowError::WindowParentLoop].
+    /// [WindowHandle] must be valid else building returns  [WindowError::InvalidWindowHandle].
+    /// [WindowHandle] can't be the [Window] itself else building returns [WindowError::WindowParentSelf].
+    /// [WindowHandle] can't create a parent loop else building returns [WindowError::WindowParentLoop].
     pub fn parent(&mut self) -> &mut Self {
         todo!()
     }
@@ -59,14 +98,14 @@ impl WindowBuilder {
     /// [WindowSize] of the new window.
     /// 
     /// Size must be between [Desktop::min] and [Desktop::max] or
-    /// building the [Window] will return [NSWindowError::WindowSizeOOB].
+    /// building the [Window] will return [WindowError::WindowSizeOOB].
     pub fn size(&mut self, size : WindowSize) -> &mut Self {
         todo!()
     }
 
     /// [WindowRelativePosition] of the window to be build. 
     /// 
-    /// Position must not be out of desktop bound or  building the [Window] will return [NSWindowError::WindowRelativePositionOOB].
+    /// Position must not be out of desktop bound or  building the [Window] will return [WindowError::WindowRelativePositionOOB].
     pub fn position(&mut self, position : WindowRelativePosition) -> &mut Self {
         todo!()
     }
@@ -76,18 +115,23 @@ impl WindowBuilder {
         todo!()
     }
 
+    /// [Window] built will be showed on desktop upon creation.
+    pub fn show(&mut self) -> &mut Self {
+        todo!()
+    }
+
     /// Reset the [WindowBuilder] with default values. 
     pub fn reset(&mut self) -> &mut Self {
         todo!()
     }
 
     /// Create a new [Window] within the [WindowManager].
-    pub fn build(&mut self, wm : &mut WindowManager) -> Result<WindowHandle, NSWindowError> {
+    pub fn build(&mut self, wm : &mut WindowManager) -> Result<WindowHandle, WindowError> {
         todo!()
     }
 
     /// Rebuild a [Window] from the [WindowBuilder] parameters.
-    pub fn rebuild(&mut self, w : &mut Window) -> Result<WindowHandle, NSWindowError> {
+    pub fn rebuild(&mut self, w : &mut Window) -> Result<WindowHandle, WindowError> {
         todo!()
     }
 

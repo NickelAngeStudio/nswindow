@@ -25,7 +25,7 @@ SOFTWARE.
 
 use nscfg::{match_cfg, target_cfg};
 
-use crate::{display::{Desktop, Displays}, NSWindowError, Window, WindowBuilder, WindowHandle, WindowManagerEvent};
+use crate::{display::{Desktop, Displays}, WindowError, Window, WindowBuilder, WindowHandle, WindowManagerEvent};
 
 
 /// [WindowManager] is used to create and manipulate [Window].
@@ -40,7 +40,7 @@ pub struct WindowManager {
 impl WindowManager {
 
     /// Create a new window manager used to create [Window], fetch [WindowManagerEvent], get [Desktop] and [Displays] informations.
-    pub fn new() -> Result<WindowManager, crate::NSWindowError> {
+    pub fn new() -> Result<WindowManager, crate::WindowError> {
 
         match_cfg! {
             linux => {  // Linux implementation try to open a Wayland connection first then fallback to X11.
@@ -48,7 +48,7 @@ impl WindowManager {
                     Ok(wm) => Ok(wm),
                     Err(_) => match WindowManager::new_x11() {  // Fallback to X11 else
                         Ok(wm) => Ok(wm),
-                        Err(_) => Err(NSWindowError::NoWindowManager),
+                        Err(_) => Err(WindowError::NoWindowManager),
                     },
                 }
             },
@@ -62,7 +62,7 @@ impl WindowManager {
     target_cfg! {
         linux & !doc => {
             /// Create a new x11 [WindowManager].
-            pub fn new_x11() -> Result<WindowManager, crate::NSWindowError> {
+            pub fn new_x11() -> Result<WindowManager, crate::WindowError> {
                 if super::linux::x11::x11_supported() {
                     
                     match super::linux::x11::manager::X11WindowManager::new() {
@@ -70,16 +70,16 @@ impl WindowManager {
                         Err(err) => Err(err),
                     }
                 } else {
-                    Err(NSWindowError::WindowManagerNotSupported)
+                    Err(WindowError::WindowManagerNotSupported)
                 }
             }
 
             /// Create a new wayland [WindowManager].
-            pub fn new_wayland() -> Result<WindowManager, crate::NSWindowError> {
+            pub fn new_wayland() -> Result<WindowManager, crate::WindowError> {
                 if super::linux::wayland::wayland_supported() {
                     todo!()
                 } else {
-                    Err(NSWindowError::WindowManagerNotSupported)
+                    Err(WindowError::WindowManagerNotSupported)
                 }
             }
         }
@@ -101,7 +101,7 @@ impl WindowManager {
     /// Returns an immutable reference to [Window] if [WindowHandle] is valid, 
     /// err([NSWNDError::InvalidWindowHandle]) otherwise.
     #[inline(always)]
-    pub fn window(&mut self, window : WindowHandle) -> Result<&Window, NSWindowError> {
+    pub fn window(&mut self, window : WindowHandle) -> Result<&Window, WindowError> {
         self.wm.window(window)
     } 
     
