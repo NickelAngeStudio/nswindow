@@ -25,7 +25,8 @@ SOFTWARE.
 
 //! Hardware display information.
 
-
+/// Handle of a display
+pub type DisplayHandle = usize;
 
 /// Refresh rate of display
 pub type DisplayRefreshRate = u32;

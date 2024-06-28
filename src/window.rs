@@ -24,16 +24,8 @@ SOFTWARE.
 
 
 
-use crate::{ display::Display, NSWindowError, WindowHandle};
+use crate::{ display::{Display, DisplayHandle}, NSWindowError, WindowHandle};
 
-
- /// Minimum [Window] width allowed.
- pub const WINDOW_MIN_WIDTH : u32 = 1;
-
- /// Minimum [Window] height allowed.
- pub const WINDOW_MIN_HEIGHT : u32 = 1;
-
- // NOTE : Max width and height are display dimensions * 2.
  
 /// [Window] size as width and height.
  #[derive(Debug, PartialEq, Clone)]
@@ -52,21 +44,38 @@ pub struct WindowPosition {
 
 /// Enumeration of possible window positions when setting position.
 #[derive(Debug, PartialEq, Clone)]
-pub enum WindowRelativePosition<'display> {
+pub enum WindowRelativePosition {
     /// Position window on desktop from an absolute pair of x,y coordinates.
     Desktop(WindowPosition),
 
     /// Position window on a specific display from an absolute pair of x,y coordinates.
-    Display(&'display Display, WindowPosition),
+    Display(DisplayHandle, WindowPosition),
 
     /// Position window in the center of given display.
-    DisplayCenter(&'display Display),
+    DisplayCenter(DisplayHandle),
 
     /// Position window relative to parent window. All [Window] have parent, up to the root which is the desktop.
     Parent(WindowPosition),
 
     /// Position window in the center of parent window. All [Window] have parent, up to the root which is the desktop.
     ParentCenter,
+}
+
+/// [Window] fullscreen modes.
+#[derive(Debug, PartialEq, Clone)]
+pub enum WindowFullScreenMode {
+
+    /// Window will be set fullscreen in the current display this window belong to.
+    Current,
+
+    /// Window will be set fullscreen in the primary displat.
+    Primary,
+
+    /// Window will be set fullscreen for entire desktop which can be set across multiple display.
+    Desktop,
+
+    /// Window will be set fullscreen for the specified display
+    Display(DisplayHandle)
 }
 
 /// [Window] is used to manipulate an individual window.

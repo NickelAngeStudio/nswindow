@@ -72,19 +72,3 @@ pub use event::WindowManagerEvent as WindowManagerEvent;
 
 /// Window handle used by the [WindowManager].
 pub type WindowHandle = *const usize;
-
-
-
-/// HashBuilder unit tests
-#[cfg(test)]
-mod tests {
-
-
-
-    #[test]
-    fn create_id_control() {
-
-        println!("yo");
-    }
-
-}

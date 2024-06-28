@@ -22,27 +22,66 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::{NSWindowError, Window, WindowHandle, WindowManager};
+use crate::{window::{WindowFullScreenMode, WindowRelativePosition, WindowSize}, NSWindowError, Window, WindowHandle, WindowManager};
 
 
 
 /// [WindowBuilder] used to create new [Window] or recreate an actual one.
 pub struct WindowBuilder {
-    
+
+    title : String,
+
+    size : WindowSize,
+
+    position : WindowRelativePosition,
+
+    parent : WindowHandle,
     
 
 }
 
 impl WindowBuilder {
 
-    
+     /// [Window] title of the new [Window].
+     fn title(&self, title : &str) -> &mut Self {
+        todo!()
+    }
+
+    /// [WindowHandle] of the parent of the new [Window].
+    /// 
+    /// [WindowHandle] must be valid else building returns  [NSWindowError::InvalidWindowHandle].
+    /// [WindowHandle] can't be the [Window] itself else building returns [NSWindowError::WindowParentSelf].
+    /// [WindowHandle] can't create a parent loop else building returns [NSWindowError::WindowParentLoop].
+    pub fn parent(&mut self) -> &mut Self {
+        todo!()
+    }
+
+    /// [WindowSize] of the new window.
+    /// 
+    /// Size must be between [Desktop::min] and [Desktop::max] or
+    /// building the [Window] will return [NSWindowError::WindowSizeOOB].
+    pub fn size(&mut self, size : WindowSize) -> &mut Self {
+        todo!()
+    }
+
+    /// [WindowRelativePosition] of the window to be build. 
+    /// 
+    /// Position must not be out of desktop bound or  building the [Window] will return [NSWindowError::WindowRelativePositionOOB].
+    pub fn position(&mut self, position : WindowRelativePosition) -> &mut Self {
+        todo!()
+    }
+
+    /// Set the [Window] fullscreen mode. This mode is applied when [Window] is showed.
+    pub fn fullscreen(&mut self, fsmode : WindowFullScreenMode) -> &mut Self {
+        todo!()
+    }
 
     /// Reset the [WindowBuilder] with default values. 
     pub fn reset(&mut self) -> &mut Self {
         todo!()
     }
 
-    /// Create a new [Window] with the [WindowManager].
+    /// Create a new [Window] within the [WindowManager].
     pub fn build(&mut self, wm : &mut WindowManager) -> Result<WindowHandle, NSWindowError> {
         todo!()
     }

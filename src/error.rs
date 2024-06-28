@@ -42,6 +42,15 @@ pub enum NSWindowError {
     /// Happens when a given [WindowRelativePosition] is out of bound.
     WindowRelativePositionOOB,
 
+    /// Happens when a given [WindowSize] is out of bound.
+    WindowSizeOOB,
+
+    /// Happens when trying to make a [Window] it's own parent
+    WindowParentSelf,
+
+    /// Happens when parent [WindowHandle] result in a loop.
+    /// Example : W1 < W2 < W3 < W1
+    WindowParentLoop,
 
     // ***********
     // * DISPLAY *
