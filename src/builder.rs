@@ -52,8 +52,6 @@ const WB_DEFAULT_MAXIMIZED : bool = false;
 const WB_DEFAULT_VISIBLE : bool = true;
 
 
-
-
 /// [WindowBuilder] used to create new [Window] or recreate an actual one.
 pub struct WindowBuilder {
 
@@ -165,7 +163,7 @@ impl WindowBuilder {
     }
 
     /// [Window] will be showed as minimized.
-    pub fn minimize(&mut self) -> &mut Self {
+    pub fn minimized(&mut self) -> &mut Self {
         self.minimized = true;
         self
     }
@@ -225,8 +223,26 @@ impl WindowBuilder {
 *************/
 #[cfg(test)]
 mod tests{
-    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MINIMIZED, WB_DEFAULT_PARENT, WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, WindowBuilder};
+    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MINIMIZED, WB_DEFAULT_PARENT, WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, WindowBuilder, WindowCursor, WindowFullScreenMode, WindowHandle, WindowKeyboard, WindowKeyboardMode, WindowPointer, WindowPointerMode, WindowPosition, WindowRelativePosition, WindowSize};
 
+    /// Test default values of WindowBuilder
+    fn test_defaults(wb : &WindowBuilder) {
+        let wkb = WindowKeyboard::new();
+        let wp = WindowPointer::new();
+
+        assert!(wb.title == WB_DEFAULT_TITLE.to_string());
+        assert!(wb.size == WB_DEFAULT_SIZE);
+        assert!(wb.position == WB_DEFAULT_POSITION);
+        assert!(wb.parent == WB_DEFAULT_PARENT);
+        assert!(wb.fsmode == WB_DEFAULT_FSMODE);
+        assert!(wb.decoration == WB_DEFAULT_DECORATION);
+        assert!(wb.minimized == WB_DEFAULT_MINIMIZED);
+        assert!(wb.maximized == WB_DEFAULT_MAXIMIZED);
+        assert!(wb.visible == WB_DEFAULT_VISIBLE);
+        assert!(wb.keyboard == wkb);
+        assert!(wb.pointer == wp);
+
+    }
 
     /// Unit tests [super::WindowBuilder] default values.
     ///
@@ -239,15 +255,75 @@ mod tests{
         let wb = WindowBuilder::new();
 
         // V1 | Test each value on creation vs default values. (except pointer and keyboard that are tested on their own)
-        assert!(wb.title == WB_DEFAULT_TITLE.to_string());
-        assert!(wb.size == WB_DEFAULT_SIZE);
-        assert!(wb.position == WB_DEFAULT_POSITION);
-        assert!(wb.parent == WB_DEFAULT_PARENT);
-        assert!(wb.fsmode == WB_DEFAULT_FSMODE);
-        assert!(wb.decoration == WB_DEFAULT_DECORATION);
-        assert!(wb.minimized == WB_DEFAULT_MINIMIZED);
-        assert!(wb.maximized == WB_DEFAULT_MAXIMIZED);
-        assert!(wb.visible == WB_DEFAULT_VISIBLE);
+        test_defaults(&wb);
+
+    }
+
+    /// Unit tests [super::WindowBuilder] modification of values.
+    ///
+    /// # Verification(s)
+    /// V1 | Allocate value to each parameter.
+    /// V2 | Compare values VS Allocated values.
+    /// V3 | Reset and test default values.
+    #[test]
+    fn ut_window_builder_modifications() {
+        const TITLE : &str = "TEST TITLE";
+        const SIZE : WindowSize = WindowSize { width: 123, height: 456 };
+        const POSITION : WindowRelativePosition = WindowRelativePosition::Primary(WindowPosition { x: 987, y: 345 });
+
+        const PARENTHANDLE : usize = 1;
+        const PARENT : Option<WindowHandle> = Some(&PARENTHANDLE);
+        const FSMODE : Option<WindowFullScreenMode> = Some(WindowFullScreenMode::Primary);
+
+        const WKB_MODE : WindowKeyboardMode = WindowKeyboardMode::Text;
+        const WKB_REPEAT : bool = true;
+
+        const WP_MODE : WindowPointerMode = WindowPointerMode::Acceleration;
+        const WP_CONFINED : bool = true;
+        const WP_VISIBLE : bool = false;
+        const WP_CURSOR : WindowCursor = WindowCursor::Move;
+
+        let mut wkb = WindowKeyboard::new();
+        wkb.mode = WKB_MODE;
+        wkb.auto_repeat = WKB_REPEAT;
+
+        let mut wp = WindowPointer::new();
+        wp.mode = WP_MODE;
+        wp.confined = WP_CONFINED;
+        wp.visible = WP_VISIBLE;
+        wp.cursor = WP_CURSOR;
+
+        // V1 | Allocate value to each parameter.
+        let mut wb = WindowBuilder::new();
+                wb.title(TITLE)
+                .size(SIZE)
+                .position(POSITION)
+                .pointer(wp)
+                .keyboard(wkb)
+                .parent(PARENT)
+                .fullscreen(FSMODE)
+                .minimized()
+                .maximized()
+                .hide()
+                .no_decoration();
+
+        
+        // V2 | Compare values VS Allocated values.
+        assert!(wb.title == TITLE.to_string());
+        assert!(wb.size == SIZE);
+        assert!(wb.position == POSITION);
+        assert!(wb.parent == PARENT);
+        assert!(wb.fsmode == FSMODE);
+        assert!(wb.decoration == false);
+        assert!(wb.minimized == true);
+        assert!(wb.maximized == true);
+        assert!(wb.visible == false);
+        assert!(wb.keyboard == wkb);
+        assert!(wb.pointer == wp);
+
+        // V3 | Reset and test default values.
+        wb.reset();
+        test_defaults(&wb);
 
     }
 

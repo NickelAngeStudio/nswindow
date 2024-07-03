@@ -74,6 +74,7 @@ pub use window::Window as Window;
 pub use property::WindowKeyboardMode as WindowKeyboardMode;
 pub use property::WindowPointerMode as WindowPointerMode;
 pub use property::WindowPointer as WindowPointer;
+pub use property::WindowCursor as WindowCursor;
 pub use property::WindowKeyboard as WindowKeyboard;
 pub use property::WindowFullScreenMode as WindowFullScreenMode;
 pub use property::WindowPosition as WindowPosition;
