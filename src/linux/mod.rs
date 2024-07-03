@@ -27,7 +27,7 @@ SOFTWARE.
 use wayland::WaylandWindow;
 use x11::window::X11Window;
 
-use crate::{event::WindowManagerEvent, display::Displays, NSWindowError, Window, WindowBuilder, WindowHandle};
+use crate::{event::WindowManagerEvent, display::Displays, WindowError, Window, WindowBuilder, WindowHandle};
 
 use self::{wayland::WaylandWindowManager, x11::manager::X11WindowManager};
 
@@ -70,7 +70,7 @@ impl LinuxWindowManager {
     /// Returns an immutable reference to [Window] if [WindowHandle] is valid, 
     /// err([nswindowError::InvalidWindowHandle]) otherwise.
     #[inline(always)]
-    pub fn window(&mut self, window : WindowHandle) -> Result<&Window, NSWindowError> {
+    pub fn window(&mut self, window : WindowHandle) -> Result<&Window, WindowError> {
         todo!()
     } 
 

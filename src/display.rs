@@ -25,7 +25,8 @@ SOFTWARE.
 
 //! Hardware display information.
 
-
+/// Handle of a display
+pub type DisplayHandle = usize;
 
 /// Refresh rate of display
 pub type DisplayRefreshRate = u32;
@@ -149,7 +150,7 @@ pub struct DisplaySupportedResolution {
     /// If true, resolution is interlaced and not progressive.
     /// 
     /// Reference(s)
-    /// https://en.wikipedia.org/wiki/Interlaced_video
+    /// <https://en.wikipedia.org/wiki/Interlaced_video>
     pub interlaced : bool,
 
     /// Refresh rate supported in that resolution.

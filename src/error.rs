@@ -22,15 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/// Enumeration of possible nswindow errors.
+/// Errors that can happens within `nswindow`.
 #[derive(Debug, PartialEq, Clone)]
-pub enum NSWindowError {
+pub enum WindowError {
 
     // **********
     // * WINDOW *
     // **********
 
-    /// Happens when using an invalid [WindowHandle]
+    /// Happens when using an invalid [WindowHandle](crate::WindowHandle).
     InvalidWindowHandle = 1,
 
     /// Happens when no system window manager is available.
@@ -39,15 +39,26 @@ pub enum NSWindowError {
     /// Happens when a system window manager is not supported
     WindowManagerNotSupported,
 
-    /// Happens when a given [WindowRelativePosition] is out of bound.
+    /// Happens when a given [WindowRelativePosition](crate::WindowRelativePosition) is out of bound.
     WindowRelativePositionOOB,
 
+    /// Happens when a given [WindowSize](crate::WindowSize) is out of bound.
+    WindowSizeOOB,
+
+    /// Happens when trying to make a [Window](crate::Window) it's own parent.
+    WindowParentSelf,
+
+    /// Happens when parent [WindowHandle](crate::WindowHandle) result in a loop.
+    /// 
+    /// # Example
+    /// Trying to set Window1 as parent of Window2 while Window2 parent of Window1.
+    WindowParentLoop,
 
     // ***********
     // * DISPLAY *
     // ***********
 
-    /// Happens when screens informations cannot be fetched
+    /// Happens when display information cannot be fetched.
     DisplayInformationError,
 
 
