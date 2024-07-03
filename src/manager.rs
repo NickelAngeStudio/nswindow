@@ -86,6 +86,11 @@ impl WindowManager {
     }
 
 
+    /// Build a [Window] from a [WindowBuilder].
+    pub(crate) fn build(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
+
     /// Poll an event from the window manager.
     /// 
     /// Returns Some(WindowManagerEvent) if any, [Option::None] if no event.

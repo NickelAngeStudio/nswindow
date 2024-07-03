@@ -24,7 +24,7 @@ SOFTWARE.
 
 
 
-use crate::{ display::{Display, DisplayHandle}, WindowError, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
+use crate::{ display::{Display, DisplayHandle}, WindowBuilder, WindowError, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
 
  
 
@@ -48,6 +48,9 @@ pub struct Window {
 impl Window {
 
 
+    pub(crate) fn rebuild(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
 
     /// Get [WindowHandle].
     pub fn handle(&self) -> WindowHandle {
@@ -95,7 +98,7 @@ impl Window {
         todo!()
     }
 
-    /// Position of the [Window] on the desktop as [WindowPosition] tuple.
+    /// [WindowPosition] of the [Window] on the desktop.
     pub fn position(&mut self) -> WindowPosition {
         todo!()
     }

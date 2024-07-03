@@ -24,6 +24,7 @@ SOFTWARE.
 
 use crate::display::DisplayHandle;
 
+
 /// [Window] size as width and height.
 #[derive(Debug, PartialEq, Clone)]
 pub struct WindowSize {
@@ -36,6 +37,54 @@ pub struct WindowSize {
 pub struct WindowPosition {
     pub x : i32,
     pub y : i32,
+}
+
+/// Enumeration of possible predefined cursor icons.
+#[derive(Debug, Clone, Copy)]
+pub enum WindowCursor {
+
+    /// Normal top left arrow cursor.
+    Normal,
+
+    /// Text selection cursor.
+    Select,
+
+    /// Cursor telling that the program is working. 
+    Working,
+
+    /// Cursor telling that the program is working in background.
+    WorkingInBackground,
+
+    /// Cursor to move an object.
+    Move,
+
+    /// Cross presision cursor.
+    Cross,
+
+    /// Hand cursor usually for hyperlink.
+    Hand,
+
+    /// Cursor showing something is forbidden.
+    Unavailable,
+
+    /// Pencil cursor for editing.
+    Pencil,
+
+    /// Up arrow usually used for column selection.
+    UpArrow,
+
+    /// Diagonal resize top left bottom right.
+    DiagonalResizeTLBR,
+
+    /// Diagonal resize bottom left top right.
+    DiagonalResizeBLTR,
+
+    /// Horizontal resize cursor.
+    HorizontalResize,
+
+    /// Vertical resize cursor.
+    VerticalResize,
+    
 }
 
 
@@ -56,6 +105,9 @@ pub enum WindowRelativePosition {
 
     /// Position window in the center of parent window. All [Window] have parent, up to the root which is the desktop.
     ParentCenter,
+
+    /// Position window on the center of primary screen.
+    PrimaryCenter,
 }
 
 /// [Window] fullscreen modes.
@@ -88,30 +140,36 @@ pub enum WindowKeyboardMode {
     Text,
 }
 
-/*
+/// Default [WindowKeyboardMode].
+const WKB_DEFAULT_MODE : WindowKeyboardMode = WindowKeyboardMode::Direct;
+
+
+/// Default auto repeat.
+const WKB_DEFAULT_REPEAT : bool = false;
+
 /// Contains keyboard properties.
 #[derive(Debug, Clone, Copy)]
 pub struct WindowKeyboard {
 
     /// [KeyboardMode] of the keyboard. Use [KeyboardMode::DirectInput] by default.
-    pub mode:WindowKeyboardMode,
+    mode : WindowKeyboardMode,
 
     /// If enabled, keys are repeated when pressed down. Disabled by default.
-    pub auto_repeat : bool,
+    auto_repeat : bool,
 
 }
 
 impl WindowKeyboard {
     /// Create new instance of keyboard property with auto repeat to false.
-    pub(crate) fn new() -> WindowKeyboard {
-        WindowKeyboard { mode : WindowKeyboardMode::DirectInput, auto_repeat: false }
+    pub fn new() -> WindowKeyboard {
+        WindowKeyboard { mode : WKB_DEFAULT_MODE, auto_repeat : WKB_DEFAULT_REPEAT}
     }
 }
-*/
+
 
 /// Enumeration of possible [Window](super::window::Window) pointer mode.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum WindowCursorMode {
+pub enum WindowPointerMode {
     /// [EventMouse](super::event::EventMouse) events will give the (x,y) location of the cursor on the window. 
     /// 
     /// Usually used for user interfaces interactions.
@@ -123,30 +181,84 @@ pub enum WindowCursorMode {
     Acceleration,
 }
 
-/*
-/// [Window](super::window::Window) cursor properties such as mode, position, etc.
+/// Default [WindowPointer] mode.
+const WP_DEFAULT_MODE : WindowPointerMode = WindowPointerMode::Cursor;
+
+/// Default [WindowPointer] visibility.
+const WP_DEFAULT_VISIBILITY : bool = true;
+
+/// Default [WindowPointer] confined.
+const WP_DEFAULT_CONFINED : bool = false;
+
+/// Default [WindowPointer] cursor.
+const WP_DEFAULT_CURSOR : WindowCursor = WindowCursor::Normal;
+
+
+/// [Window](super::window::Window) pointer properties such as mode, position, etc.
 #[derive(Debug, Clone, Copy)]
-pub struct WindowCursor {
+pub struct WindowPointer {
     /// [PointerMode] used for [EventMouse](super::event::EventMouse) events.
-    pub mode : WindowCursorMode,
+    pub mode : WindowPointerMode,
 
     /// Indicate if cursor is visible or hidden.
     pub visible : bool,
 
     /// Indicate if cursor is confined to the window boundaries or not.
     pub confined : bool, 
+
+    /// Cursor showed on the window.
+    pub cursor : WindowCursor,
 }
 
 
 
-impl WindowCursor {
+impl WindowPointer {
     /// Create a new [PointerProperty] with default values.
-    pub(crate) fn new() -> WindowCursor {
-        WindowCursor{ 
-            mode: WindowCursorMode::Cursor, 
-            visible: true, 
-            confined: false,
+    pub(crate) fn new() -> WindowPointer {
+        WindowPointer{ 
+            mode: WP_DEFAULT_MODE, 
+            visible: WP_DEFAULT_VISIBILITY, 
+            confined: WP_DEFAULT_CONFINED,
+            cursor: WP_DEFAULT_CURSOR,
         }
     }
 }
-*/
+
+
+/*************
+* UNIT TESTS * 
+*************/
+#[cfg(test)]
+mod tests{
+    use crate::{property::{WKB_DEFAULT_MODE, WKB_DEFAULT_REPEAT}, WindowKeyboard, WindowPointer};
+
+    
+
+    /// Unit tests [super::WindowKeyboard] default values.
+    ///
+    /// # Verification(s)
+    /// V1 | Test each value on creation vs default values.
+    #[test]
+    fn ut_window_keyboard_default() {
+        let wkb = WindowKeyboard::new();
+
+        // V1 | Test each value on creation vs default values.
+        assert!(wkb.mode == WKB_DEFAULT_MODE);
+        assert!(wkb.auto_repeat == WKB_DEFAULT_REPEAT);
+
+    }
+
+    /// Unit tests [super::WindowPointer] default values.
+    ///
+    /// # Verification(s)
+    /// V1 | Test each value on creation vs default values.
+    #[test]
+    fn ut_window_pointer_default() {
+        let wp: WindowKeyboard = WindowPointer::new();
+
+        // V1 | Test each value on creation vs default values.
+        
+
+    }
+
+}

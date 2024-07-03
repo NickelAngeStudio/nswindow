@@ -22,117 +22,233 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::{Window, WindowCursorMode, WindowError, WindowFullScreenMode, WindowHandle, WindowKeyboardMode, WindowManager, WindowRelativePosition, WindowSize};
+use crate::{Window, WindowError, WindowFullScreenMode, WindowHandle, WindowKeyboard, WindowManager, WindowPointer, WindowRelativePosition, WindowSize};
+
+/// Default title of [Window].
+const WB_DEFAULT_TITLE : &str = "New window";
+
+/// Default size of [Window].
+const WB_DEFAULT_SIZE : WindowSize = WindowSize { width: 640, height: 480 };
+
+/// Default position of [Window].
+const WB_DEFAULT_POSITION : WindowRelativePosition = WindowRelativePosition::PrimaryCenter;
+
+/// Default parent of [Window].
+const WB_DEFAULT_PARENT : Option<WindowHandle> = None;
+
+/// Default fullscreen mode of [Window].
+const WB_DEFAULT_FSMODE : Option<WindowFullScreenMode> = None;
+
+/// Default decoration toggle of [Window].
+const WB_DEFAULT_DECORATION : bool = true;
+
+/// Default minimized toggle of [Window].
+const WB_DEFAULT_MINIMIZED : bool = false;
+
+/// Default maximized toggle of [Window].
+const WB_DEFAULT_MAXIMIZED : bool = false;
+
+/// Default visibility toggle of [Window].
+const WB_DEFAULT_VISIBLE : bool = true;
+
 
 
 
 /// [WindowBuilder] used to create new [Window] or recreate an actual one.
 pub struct WindowBuilder {
 
+    /// Title of the [Window]
     title : String,
 
+    /// Size of the [Window]
     size : WindowSize,
 
+    /// Relative position of the [Window].
     position : WindowRelativePosition,
 
-    parent : WindowHandle,
-    
-    cursor_mode : WindowCursorMode,
+    /// Parent of the [Window].
+    parent : Option<WindowHandle>,
 
-    cursor_visible : bool,
+    /// Keyboard properties for [Window].
+    keyboard : WindowKeyboard,
 
-    cursor_confined : bool, 
+    /// Pointer properties for [Window]
+    pointer : WindowPointer,
 
-    keyboard_mode : WindowKeyboardMode,
+    /// Fullscreen mode
+    fsmode : Option<WindowFullScreenMode>,
 
-    keyboard_autorepeat : bool,
+    /// Show desktop frame around [Window].
+    decoration : bool,
+
+    /// Window minimized
+    minimized : bool,
+
+    /// Window maximized
+    maximized : bool,
+
+    /// Window will be showed on desktop when created.
+    visible : bool,
+
 }
 
 impl WindowBuilder {
 
-    /// Create a new [WindowBuilder] instance.
+    /// Create a new [WindowBuilder] instance with default parameters. See 
     pub fn new() -> WindowBuilder {
-        todo!()
+        WindowBuilder { 
+            title: WB_DEFAULT_TITLE.to_string(), 
+            size: WB_DEFAULT_SIZE, 
+            position: WB_DEFAULT_POSITION, 
+            parent: WB_DEFAULT_PARENT, 
+            keyboard: WindowKeyboard::new(), 
+            pointer: WindowPointer::new(), 
+            decoration: WB_DEFAULT_DECORATION,
+            fsmode: WB_DEFAULT_FSMODE,
+            minimized: WB_DEFAULT_MINIMIZED,
+            maximized: WB_DEFAULT_MAXIMIZED, 
+            visible : WB_DEFAULT_VISIBLE,
+        }
     }
 
-    /// [Window] cursor mode.
-    pub fn cursor_mode(&mut self, mode : WindowCursorMode) -> &mut Self {
-        todo!()
-    }
-
-    /// Toggle [Window] cursor visibility.
-    pub fn cursor_visible(&mut self, visible : bool) -> &mut Self {
-        todo!()
-    }
-
-    /// Toggle [Window] cursor confined within boundaries.
-    pub fn cursor_confined(&mut self, confined : bool) -> &mut Self {
-        todo!()
-    }
-
-    /// [Window] keyboard mode.
-    pub fn keyboard_mode(&mut self, mode : WindowKeyboardMode) -> &mut Self {
-        todo!()
-    }
-
-    /// Toggle [Window] keyboard auto repeat. Default : false
-    pub fn keyboard_autorepeat(&mut self, autorepeat : bool) -> &mut Self {
-        todo!()
-    }
-
-
-    /// [Window] title of the new [Window].
+    /// Set the [Window] title of the new [Window].
     pub fn title(&mut self, title : &str) -> &mut Self {
-        todo!()
+        self.title = title.to_string();
+        self
+    }
+
+    /// Set the [WindowSize] of the new window.
+    /// 
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::WindowSizeOOB`] if `size` isn't between [Desktop::min](crate::display::Desktop::min) and [Desktop::max](crate::display::Desktop::max).
+    pub fn size(&mut self, size : WindowSize) -> &mut Self {
+        self.size = size;
+        self
+    }
+
+    /// Set the [WindowRelativePosition] of the window to be build. 
+    /// 
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::WindowRelativePositionOOB`] if position would be out of desktop bound.
+    pub fn position(&mut self, position : WindowRelativePosition) -> &mut Self {
+        self.position = position;
+        self
+    }
+
+    /// Override the default [WindowPointer].
+    pub fn pointer(&mut self, pointer : WindowPointer) -> &mut Self {
+        self.pointer = pointer;
+        self
+    }
+
+    /// Override the default [WindowKeyboard].
+    pub fn keyboard(&mut self, keyboard : WindowKeyboard) -> &mut Self {
+        self.keyboard = keyboard;
+        self
     }
 
     /// [WindowHandle] of the parent of the new [Window].
     /// 
-    /// [WindowHandle] must be valid else building returns  [WindowError::InvalidWindowHandle].
-    /// [WindowHandle] can't be the [Window] itself else building returns [WindowError::WindowParentSelf].
-    /// [WindowHandle] can't create a parent loop else building returns [WindowError::WindowParentLoop].
-    pub fn parent(&mut self) -> &mut Self {
-        todo!()
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::InvalidWindowHandle`] if [WindowHandle] doesn't refer to any [Window].
+    /// [WindowBuilder::rebuild] returns [`WindowError::WindowParentSelf`] if [WindowHandle] if the same as the [Window] itself.
+    /// [WindowBuilder::build] returns [`WindowError::WindowParentLoop`] if a parent loop would occur upon creation.
+    pub fn parent(&mut self, parent : Option<WindowHandle>) -> &mut Self {
+        self.parent = parent;
+        self
     }
-
-    /// [WindowSize] of the new window.
-    /// 
-    /// Size must be between [Desktop::min] and [Desktop::max] or
-    /// building the [Window] will return [WindowError::WindowSizeOOB].
-    pub fn size(&mut self, size : WindowSize) -> &mut Self {
-        todo!()
-    }
-
-    /// [WindowRelativePosition] of the window to be build. 
-    /// 
-    /// Position must not be out of desktop bound or  building the [Window] will return [WindowError::WindowRelativePositionOOB].
-    pub fn position(&mut self, position : WindowRelativePosition) -> &mut Self {
-        todo!()
-    }
-
+   
     /// Set the [Window] fullscreen mode. This mode is applied when [Window] is showed.
-    pub fn fullscreen(&mut self, fsmode : WindowFullScreenMode) -> &mut Self {
-        todo!()
+    pub fn fullscreen(&mut self, fsmode : Option<WindowFullScreenMode>) -> &mut Self {
+        self.fsmode = fsmode;
+        self
     }
 
-    /// [Window] built will be showed on desktop upon creation.
-    pub fn show(&mut self) -> &mut Self {
-        todo!()
+    /// [Window] will be showed as minimized.
+    pub fn minimize(&mut self) -> &mut Self {
+        self.minimized = true;
+        self
+    }
+
+    /// [Window] will be showed as maximized.
+    pub fn maximized(&mut self) -> &mut Self {
+        self.maximized = true;
+        self
+    }
+
+    /// [Window] built will not be showed on desktop upon creation.
+    /// 
+    /// By default, [Window] created are visible.
+    pub fn hide(&mut self) -> &mut Self {
+        self.visible = false;
+        self
+    }
+
+    /// Remove [Window] decoration on creation (Title bar, min and max buttons, etc...).
+    pub fn no_decoration(&mut self) -> &mut Self {
+        self.decoration = false;
+        self
     }
 
     /// Reset the [WindowBuilder] with default values. 
     pub fn reset(&mut self) -> &mut Self {
-        todo!()
+        self.title = WB_DEFAULT_TITLE.to_string();
+        self.size = WB_DEFAULT_SIZE;
+        self.position = WB_DEFAULT_POSITION; 
+        self.parent = WB_DEFAULT_PARENT;
+        self.keyboard = WindowKeyboard::new(); 
+        self.pointer = WindowPointer::new();
+        self.decoration = WB_DEFAULT_DECORATION;
+        self.fsmode = WB_DEFAULT_FSMODE;
+        self.minimized = WB_DEFAULT_MINIMIZED;
+        self.maximized = WB_DEFAULT_MAXIMIZED;
+        self.visible = WB_DEFAULT_VISIBLE;
+        self
     }
 
-    /// Create a new [Window] within the [WindowManager].
+    /// Build a new [Window] within the given [WindowManager].
     pub fn build(&mut self, wm : &mut WindowManager) -> Result<WindowHandle, WindowError> {
-        todo!()
+        wm.build(self)
     }
 
     /// Rebuild a [Window] from the [WindowBuilder] parameters.
     pub fn rebuild(&mut self, w : &mut Window) -> Result<WindowHandle, WindowError> {
-        todo!()
+        w.rebuild(self)
+    }
+
+}
+
+
+
+/*************
+* UNIT TESTS * 
+*************/
+#[cfg(test)]
+mod tests{
+    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MINIMIZED, WB_DEFAULT_PARENT, WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, WindowBuilder};
+
+
+    /// Unit tests [super::WindowBuilder] default values.
+    ///
+    /// # Verification(s)
+    /// V1 | Test each value on creation vs default values. (except pointer and keyboard that are tested on their own)
+    /// V2 | Test each pointer values.
+    /// V3 | Test each keyboard values.
+    #[test]
+    fn ut_window_builder_default() {
+        let wb = WindowBuilder::new();
+
+        // V1 | Test each value on creation vs default values. (except pointer and keyboard that are tested on their own)
+        assert!(wb.title == WB_DEFAULT_TITLE.to_string());
+        assert!(wb.size == WB_DEFAULT_SIZE);
+        assert!(wb.position == WB_DEFAULT_POSITION);
+        assert!(wb.parent == WB_DEFAULT_PARENT);
+        assert!(wb.fsmode == WB_DEFAULT_FSMODE);
+        assert!(wb.decoration == WB_DEFAULT_DECORATION);
+        assert!(wb.minimized == WB_DEFAULT_MINIMIZED);
+        assert!(wb.maximized == WB_DEFAULT_MAXIMIZED);
+        assert!(wb.visible == WB_DEFAULT_VISIBLE);
+
     }
 
 }
