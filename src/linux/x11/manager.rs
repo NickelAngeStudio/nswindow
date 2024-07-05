@@ -25,7 +25,7 @@ SOFTWARE.
 
 use crate::{event::WindowManagerEvent, display::Displays, WindowError};
 
-use super::{atom::X11Atoms, Display, Window, XEvent, XOpenDisplay};
+use super::{atom::X11Atoms, xlib::Display, xlib::Window, xlib::XEvent, xlib::XOpenDisplay};
 
 pub(crate) struct X11WindowManager {
 
@@ -53,7 +53,7 @@ impl Drop for X11WindowManager {
     fn drop(&mut self) {
         unsafe {
             // Close display connection
-            super::XCloseDisplay(self.x11display);
+            super::xlib::XCloseDisplay(self.x11display);
         }
     }
 }

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::{Window, WindowError, WindowFullScreenMode, WindowHandle, WindowKeyboard, WindowManager, WindowPointer, WindowRelativePosition, WindowSize};
+use crate::{Window, WindowError, WindowFullScreenMode, WindowHandle, keyboard::WindowKeyboard, WindowManager, pointer::WindowPointer, WindowRelativePosition, WindowSize};
 
 /// Default title of [Window].
 const WB_DEFAULT_TITLE : &str = "New window";
@@ -223,7 +223,10 @@ impl WindowBuilder {
 *************/
 #[cfg(test)]
 mod tests{
-    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MINIMIZED, WB_DEFAULT_PARENT, WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, WindowBuilder, WindowCursor, WindowFullScreenMode, WindowHandle, WindowKeyboard, WindowKeyboardMode, WindowPointer, WindowPointerMode, WindowPosition, WindowRelativePosition, WindowSize};
+    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MINIMIZED, WB_DEFAULT_PARENT, 
+        WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, WindowBuilder, 
+        pointer::WindowCursor, WindowFullScreenMode, WindowHandle, keyboard::WindowKeyboard, keyboard::WindowKeyboardMode, 
+        pointer::WindowPointer, pointer::WindowPointerMode, WindowPosition, WindowRelativePosition, WindowSize};
 
     /// Test default values of WindowBuilder
     fn test_defaults(wb : &WindowBuilder) {

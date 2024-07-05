@@ -23,26 +23,30 @@ SOFTWARE.
 */
 
 
+//! Events polled by a [WindowManager](crate::WindowManager).
 
 use crate::WindowHandle;
 
-/// Enumeration of possible [WindowManager] events.
-pub enum WindowManagerEvent {
-
-    /// Events that refer to the state of a window itself.
-    Window(WindowHandle, WindowEvent),
-
-    /// Events that refer to keyboard presses
-    Keyboard(WindowHandle, KeyboardEvent),
-
-    /// Event that refer to the pointer / cursor device.
-    Pointer(WindowHandle, PointerEvent),
+/// [WindowEvent] with [WindowHandle] returned with [WindowManager::event()](crate::WindowManager::event()).
+pub struct WindowManagerEvent {
+    
+    /// [WindowHandle] of [Window](crate::Window) which [Event] refer to.
+    pub window : WindowHandle,
 
 
+    /// [WindowEvent] that occurred.
+    pub event : WindowEvent,
 
 }
 
+/// Possible [WindowEvent] that can occur.
 pub enum WindowEvent {
+
+    /// Events that refer to keyboard presses
+    Keyboard(WindowKeyboardEvent),
+
+    /// Event that refer to the pointer / cursor device.
+    Pointer(WindowPointerEvent),
 
     /// Happens when window is created.
     Created,
@@ -110,9 +114,9 @@ pub enum WindowEvent {
 
 }
 
-/// Enumeration of possible Keyboard events
+/// Possible [WindowKeyboardEvent] that can occur.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum KeyboardEvent {
+pub enum WindowKeyboardEvent {
     // Keyboard key down event of direct input mode. Provides keycode as u32.
     KeyDown(u32),
 
@@ -124,7 +128,8 @@ pub enum KeyboardEvent {
 }
 
 
-pub enum PointerEvent {
+/// Possible [WindowPointerEvent] that can occur.
+pub enum WindowPointerEvent {
     /// Pointer move event. Provides new (x, y) position. Only when in pointer mode.
     Move((i32, i32)),
 

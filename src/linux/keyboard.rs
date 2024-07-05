@@ -21,23 +21,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
-
-
-use crate::{event::WindowManagerEvent, display::Displays};
-
-
-pub(crate) mod manager;
-pub(crate) mod window;
-pub(crate) mod keyboard;
-pub(crate) mod pointer;
-
-
-/// This function spawn a new thread and try to connect to wayland server to see if available.
-/// 
-/// TODO:Create thread
-/// 
-/// Return true if wayland server is available and supported. False otherwise.
-pub fn wayland_supported() -> bool { 
-    false
-}

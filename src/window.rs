@@ -24,9 +24,66 @@ SOFTWARE.
 
 
 
-use crate::{ display::{Display, DisplayHandle}, WindowBuilder, WindowError, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
+use crate::{ display::{Display, DisplayHandle}, WindowBuilder, WindowError, WindowHandle};
 
  
+
+/// [Window](crate::Window) size as width and height.
+#[derive(Debug, PartialEq, Clone)]
+pub struct WindowSize {
+    pub width : u32,
+    pub height : u32,
+}
+
+/// [Window](crate::Window) position according to x and y axis.
+#[derive(Debug, PartialEq, Clone)]
+pub struct WindowPosition {
+    pub x : i32,
+    pub y : i32,
+}
+
+
+/// Possible [Window](crate::Window) relative positions.
+#[derive(Debug, PartialEq, Clone)]
+pub enum WindowRelativePosition {
+    /// Position window on desktop from an absolute pair of x,y coordinates.
+    Desktop(WindowPosition),
+
+    /// Position window on a specific display from an absolute pair of x,y coordinates.
+    Display(DisplayHandle, WindowPosition),
+
+    /// Position window in the center of given display.
+    DisplayCenter(DisplayHandle),
+
+    /// Position window relative to parent window. All [Window] have parent, up to the root which is the desktop.
+    Parent(WindowPosition),
+
+    /// Position window in the center of parent window. All [Window] have parent, up to the root which is the desktop.
+    ParentCenter,
+
+    /// Position window on the center of primary display.
+    PrimaryCenter,
+
+    /// Position window on the primary display with [WindowPosition].
+    Primary(WindowPosition),
+}
+
+/// Possible [Window](crate::Window) fullscreen modes.
+#[derive(Debug, PartialEq, Clone)]
+pub enum WindowFullScreenMode {
+
+    /// Window will be set fullscreen in the current display this window belong to.
+    Current,
+
+    /// Window will be set fullscreen in the primary display.
+    Primary,
+
+    /// Window will be set fullscreen for entire desktop which can be set across multiple display.
+    Desktop,
+
+    /// Window will be set fullscreen for the specified display
+    Display(DisplayHandle)
+}
 
 
 /// [Window] is used to manipulate an individual window.
@@ -36,7 +93,7 @@ use crate::{ display::{Display, DisplayHandle}, WindowBuilder, WindowError, Wind
 pub struct Window {
     /// Linux [Window] abstraction for calls.
     #[cfg(target_os = "linux")]
-    window : crate::linux::LinuxWindow,  
+    window : crate::linux::window::LinuxWindow,  
 
 
     /// Parent [WindowHandle]

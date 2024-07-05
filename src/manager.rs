@@ -25,7 +25,7 @@ SOFTWARE.
 
 use nscfg::{match_cfg, target_cfg};
 
-use crate::{display::{Desktop, Displays}, WindowError, Window, WindowBuilder, WindowHandle, WindowManagerEvent};
+use crate::{display::{Desktop, Displays}, WindowError, Window, WindowBuilder, WindowHandle, event::WindowManagerEvent};
 
 
 /// [WindowManager] is used to create and manipulate [Window].
@@ -34,7 +34,7 @@ use crate::{display::{Desktop, Displays}, WindowError, Window, WindowBuilder, Wi
 pub struct WindowManager {
     /// Linux [WindowManager] abstraction for calls.
     #[cfg(target_os = "linux")]
-    wm : crate::linux::LinuxWindowManager,
+    wm : crate::linux::manager::LinuxWindowManager,
 }
 
 impl WindowManager {
@@ -66,7 +66,7 @@ impl WindowManager {
                 if super::linux::x11::x11_supported() {
                     
                     match super::linux::x11::manager::X11WindowManager::new() {
-                        Ok(wm) => Ok(WindowManager{ wm: super::linux::LinuxWindowManager::X11(wm)}),
+                        Ok(wm) => Ok(WindowManager{ wm: super::linux::manager::LinuxWindowManager::X11(wm)}),
                         Err(err) => Err(err),
                     }
                 } else {
