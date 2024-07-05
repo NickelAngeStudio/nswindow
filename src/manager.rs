@@ -25,7 +25,7 @@ SOFTWARE.
 
 use nscfg::{match_cfg, target_cfg};
 
-use crate::{display::{Desktop, Displays}, WindowError, Window, WindowBuilder, WindowHandle, event::WindowManagerEvent};
+use crate::{display::Displays, WindowError, Window, WindowBuilder, WindowHandle, event::WindowManagerEvent};
 
 
 /// [WindowManager] is used to create and manipulate [Window].
@@ -113,7 +113,7 @@ impl WindowManager {
     /// Returns a mutable reference to [Window] if [WindowHandle] is valid, 
     /// err([NSWNDError::InvalidWindowHandle]) otherwise.
     #[inline(always)]
-    pub fn window_mut(&mut self, window : WindowHandle) -> &mut Window {
+    pub fn window_mut(&mut self, window : WindowHandle) -> Result<&mut Window, WindowError> {
         self.wm.window_mut(window)
     }
 

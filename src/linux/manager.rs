@@ -32,9 +32,6 @@ use super::{wayland::manager::WaylandWindowManager, x11::manager::X11WindowManag
 /// Match abstraction are WAY faster that [dyn] vtable.
 pub(crate) enum LinuxWindowManager {
 
-    /// No Linux Window manager available
-    None,
-
     /// X11 linux window server
     X11(X11WindowManager),
 
@@ -48,28 +45,29 @@ impl LinuxWindowManager {
     #[inline(always)]
     pub(crate) fn event(&self) -> Option<WindowManagerEvent> {
         match self {
-            LinuxWindowManager::None => panic!(),   // Panic since doesn't exists.
             LinuxWindowManager::X11(wm) => wm.event(),
             LinuxWindowManager::Wayland(wm) => wm.event(),
         }
     }
 
-    /// Returns an immutable reference to [Window] if [WindowHandle] is valid, 
-    /// err([nswindowError::InvalidWindowHandle]) otherwise.
+    #[inline(always)]
+    pub(crate) fn build(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
+
     #[inline(always)]
     pub fn window(&mut self, window : WindowHandle) -> Result<&Window, WindowError> {
         todo!()
     } 
 
     #[inline(always)]
-    pub fn window_mut(&mut self, window : WindowHandle) -> &mut Window {
+    pub fn window_mut(&mut self, window : WindowHandle) -> Result<&mut Window, WindowError> {
         todo!()
     }
 
     #[inline(always)]
     pub fn displays(&self) -> &Displays {
         match self {
-            LinuxWindowManager::None => panic!(),   // Panic since doesn't exists.
             LinuxWindowManager::X11(wm) => wm.displays(),
             LinuxWindowManager::Wayland(wm) => wm.displays(),
         }
