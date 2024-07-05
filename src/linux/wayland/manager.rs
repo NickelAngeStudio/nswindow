@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::{display::Displays, event::WindowManagerEvent};
+use crate::{display::Displays, event::WindowManagerEvent, Window, WindowBuilder, WindowError, WindowHandle};
 
 
 pub struct WaylandWindowManager {
@@ -30,14 +30,31 @@ pub struct WaylandWindowManager {
 }
 
 impl WaylandWindowManager {
-    /// Create a new instance of WaylandWindowManager
+    #[inline(always)]
     pub fn new() -> WaylandWindowManager {
         WaylandWindowManager {}
     }
 
+    #[inline(always)]
     pub fn event(&self) -> Option<WindowManagerEvent> {
         todo!()
     }
+
+    #[inline(always)]
+    pub(crate) fn build(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn window(&mut self, window : WindowHandle) -> Result<&Window, WindowError> {
+        todo!()
+    } 
+
+    #[inline(always)]
+    pub fn window_mut(&mut self, window : WindowHandle) -> Result<&mut Window, WindowError> {
+        todo!()
+    }
+
 
     #[inline(always)]
     pub fn displays(&self) -> &Displays {

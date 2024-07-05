@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 
-use crate::{event::WindowManagerEvent, display::Displays, WindowError};
+use crate::{display::Displays, event::WindowManagerEvent, WindowBuilder, WindowError, WindowHandle};
 
 use super::{atom::X11Atoms, xlib::Display, xlib::Window, xlib::XEvent, xlib::XOpenDisplay};
 
@@ -38,7 +38,7 @@ pub(crate) struct X11WindowManager {
     /// X11 server display connection pointer
     x11display : *mut Display,
 
-    /// List of screens
+    /// List of display
     displays : Displays, 
 
     /// Atoms for handling x11 window properties
@@ -59,9 +59,7 @@ impl Drop for X11WindowManager {
 }
 
 impl X11WindowManager {
-    /// Create a new instance of X11WindowManager
-    /// 
-    /// Returns Ok(X11WindowManager) on success, Err(NSWindowError::ScreenInformationError) on error.
+    #[inline(always)]
     pub fn new() -> Result<X11WindowManager, WindowError> {
 
         unsafe {
@@ -82,11 +80,29 @@ impl X11WindowManager {
             }
         }
     }
+    
 
     #[inline(always)]
     pub fn event(&self) -> Option<WindowManagerEvent> {
         todo!()
     }
+
+
+    #[inline(always)]
+    pub(crate) fn build(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn window(&mut self, window : WindowHandle) -> Result<&Window, WindowError> {
+        todo!()
+    } 
+
+    #[inline(always)]
+    pub fn window_mut(&mut self, window : WindowHandle) -> Result<&mut Window, WindowError> {
+        todo!()
+    }
+
 
     #[inline(always)]
     pub fn displays(&self) -> &Displays {
