@@ -21,3 +21,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+use crate::keyboard::WindowKeyboardMode;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct WaylandKeyboard {
+    
+}
+
+impl WaylandKeyboard {
+
+    #[inline(always)]
+    pub fn set_mode(&mut self, mode : WindowKeyboardMode) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn enable_repeat(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn disable_repeat(&mut self) {
+        todo!()
+    }
+}

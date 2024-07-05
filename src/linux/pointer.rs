@@ -42,6 +42,7 @@ pub(crate) enum LinuxPointer {
 
 impl LinuxPointer {
 
+    #[inline(always)]
     pub fn set_mode(&mut self, mode : WindowPointerMode) {
         match self {
             LinuxPointer::X11(lp) => lp.set_mode(mode),
@@ -49,6 +50,7 @@ impl LinuxPointer {
         }
     }
 
+    #[inline(always)]
     pub fn show(&mut self) {
         match self {
             LinuxPointer::X11(lp) => lp.show(),
@@ -56,6 +58,7 @@ impl LinuxPointer {
         }
     }
 
+    #[inline(always)]
     pub fn hide(&mut self) {
         match self {
             LinuxPointer::X11(lp) => lp.hide(),
@@ -63,6 +66,7 @@ impl LinuxPointer {
         }
     }
 
+    #[inline(always)]
     pub fn confine(&mut self) {
         match self {
             LinuxPointer::X11(lp) => lp.confine(),
@@ -70,6 +74,7 @@ impl LinuxPointer {
         }
     }
 
+    #[inline(always)]
     pub fn release(&mut self) {
         match self {
             LinuxPointer::X11(lp) => lp.release(),
@@ -77,6 +82,7 @@ impl LinuxPointer {
         }
     }
 
+    #[inline(always)]
     pub fn set_cursor(&mut self, cursor : WindowCursor) {
         match self {
             LinuxPointer::X11(lp) => lp.set_cursor(cursor),

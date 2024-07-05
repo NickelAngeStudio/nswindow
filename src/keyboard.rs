@@ -24,6 +24,8 @@ SOFTWARE.
 
 //! Keyboard properties of [Window](crate::Window).
 
+use nscfg::match_cfg;
+
 /// Default [WindowKeyboardMode].
 const WKB_DEFAULT_MODE : WindowKeyboardMode = WindowKeyboardMode::Direct;
 
@@ -33,6 +35,10 @@ const WKB_DEFAULT_REPEAT : bool = false;
 /// [Window](crate::Window) keyboard properties.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WindowKeyboard {
+
+    /// Linux [WindowKeyboard] abstraction for calls. Is set as [Option] since [WindowBuilder] can use it.
+    #[cfg(target_os = "linux")]
+    keyboard : Option<crate::linux::keyboard::LinuxKeyboard>,
 
     /// [KeyboardMode] of the keyboard. Use [KeyboardMode::DirectInput] by default.
     pub(crate) mode : WindowKeyboardMode,
@@ -45,13 +51,74 @@ pub struct WindowKeyboard {
 impl WindowKeyboard {
     /// Create new instance of keyboard property with auto repeat to false.
     pub fn new() -> WindowKeyboard {
-        WindowKeyboard { mode : WKB_DEFAULT_MODE, auto_repeat : WKB_DEFAULT_REPEAT}
+        WindowKeyboard { keyboard : None,  mode : WKB_DEFAULT_MODE, auto_repeat : WKB_DEFAULT_REPEAT}
     }
 
     /// Returns the [WindowKeyboardMode] of the [Window](crate::Window).
     pub fn mode(&self) -> WindowKeyboardMode {
         self.mode
     }
+
+    /// Set the [WindowKeyboardMode] of the [Window](crate::Window). Does nothing if already the same mode.
+    pub fn set_mode(&mut self, mode : WindowKeyboardMode) {
+        
+        if self.mode != mode {
+            self.mode = mode;
+
+            match_cfg! {
+                linux => {
+                    match self.keyboard {
+                        Some(mut wkb) => wkb.set_mode(mode),
+                        None => {},
+                    }
+                },
+                _ => {};
+            }
+        }
+    }
+
+    /// Returns true if keyboard will repeat a key that is pressed down.
+    pub fn repeat(&self) -> bool {
+        self.auto_repeat
+    }
+
+    /// Enable keyboard press auto repeat. Does nothing if already is.
+    pub fn enable_repeat(&mut self) {
+        if !self.auto_repeat {
+            self.auto_repeat = true;
+
+            match_cfg! {
+                linux => {
+                    match self.keyboard {
+                        Some(mut wkb) => wkb.enable_repeat(),
+                        None => {},
+                    }
+                },
+                _ => {};
+            }
+
+        }
+    }
+
+    /// Disable keyboard press auto repeat. Does nothing if already is.
+    pub fn disable_repeat(&mut self) {
+        if self.auto_repeat {
+            self.auto_repeat = false;
+
+            match_cfg! {
+                linux => {
+                    match self.keyboard {
+                        Some(mut wkb) => wkb.disable_repeat(),
+                        None => {},
+                    }
+                },
+                _ => {};
+            }
+
+        }
+    }
+
+
 
 }
 
@@ -75,7 +142,7 @@ pub enum WindowKeyboardMode {
 *************/
 #[cfg(test)]
 mod tests{
-    use crate::{keyboard::{WKB_DEFAULT_MODE, WKB_DEFAULT_REPEAT, WindowKeyboard} };
+    use crate::keyboard::{WindowKeyboard, WindowKeyboardMode, WKB_DEFAULT_MODE, WKB_DEFAULT_REPEAT};
     
 
     /// Unit tests [super::WindowKeyboard] default values.
@@ -87,7 +154,34 @@ mod tests{
         let wkb = WindowKeyboard::new();
 
         // V1 | Test each value on creation vs default values.
+        assert!(wkb.keyboard == None);
         assert!(wkb.mode == WKB_DEFAULT_MODE);
+        assert!(wkb.auto_repeat == WKB_DEFAULT_REPEAT);
+
+    }
+
+    /// Unit tests [super::WindowKeyboard] value update.
+    ///
+    /// # Verification(s)
+    /// V1 | Modify and test each value.
+    #[test]
+    fn ut_window_keyboard_update() {
+        let mut wkb = WindowKeyboard::new();
+
+        // V1 | Modify and test each value.
+        
+        // Mode
+        const MODE : WindowKeyboardMode = WindowKeyboardMode::Text;
+
+        assert!(wkb.mode == WKB_DEFAULT_MODE);
+        wkb.mode = MODE;
+        assert!(wkb.mode == MODE);
+
+        // Auto repeat
+        assert!(wkb.auto_repeat == WKB_DEFAULT_REPEAT);
+        wkb.enable_repeat();
+        assert!(wkb.auto_repeat == !WKB_DEFAULT_REPEAT);
+        wkb.disable_repeat();
         assert!(wkb.auto_repeat == WKB_DEFAULT_REPEAT);
 
     }

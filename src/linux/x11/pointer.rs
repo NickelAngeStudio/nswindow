@@ -30,27 +30,35 @@ pub(crate) struct X11Pointer {
 }
 
 impl X11Pointer {
+    
+    #[inline(always)]
     pub fn set_mode(&mut self, mode : WindowPointerMode) {
         todo!()
     }
 
+    #[inline(always)]
     pub fn show(&mut self) {
         todo!()
     }
 
+    #[inline(always)]
     pub fn hide(&mut self) {
         todo!()
     }
 
+    #[inline(always)]
     pub fn confine(&mut self) {
         todo!()
     }
 
+    #[inline(always)]
     pub fn release(&mut self) {
         todo!()
     }
 
+    #[inline(always)]
     pub fn set_cursor(&mut self, cursor : WindowCursor) {
         todo!()
     }
+
 }

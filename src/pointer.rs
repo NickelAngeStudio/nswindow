@@ -24,7 +24,7 @@ SOFTWARE.
 
 //! Pointer / Mouse and cursor properties of [Window](crate::Window). 
 
-use nscfg::{match_cfg, target_cfg};
+use nscfg::match_cfg;
 
 /// Default [WindowPointer] mode.
 const WP_DEFAULT_MODE : WindowPointerMode = WindowPointerMode::Cursor;
