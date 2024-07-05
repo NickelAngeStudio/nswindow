@@ -22,16 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
- // X11 Bindings
- #![allow(non_upper_case_globals)]
- #![allow(non_camel_case_types)]
- #![allow(non_snake_case)]
- #![allow(unused)]
- include!(concat!(env!("OUT_DIR"), "/x11.rs"));
-
 use std::{panic::catch_unwind, thread};
 
+/// XLib bindings
+pub(crate) mod xlib;
 
 /// X11 Window Manager
 pub(crate) mod manager;
@@ -48,6 +42,12 @@ pub(crate) mod atom;
 /// X11 Event fetch
 pub(crate) mod event;
 
+/// X11 pointer
+pub(crate) mod pointer;
+
+/// X11 Keyboard
+pub(crate) mod keyboard;
+
 /// This function spawn a new thread and try to connect to X11 server to see if available.
 /// 
 /// Return true if x11 server is available and supported. False otherwise.
@@ -58,7 +58,7 @@ pub fn x11_supported() -> bool {
         let thread_join_handle = thread::spawn(move || {
             // Try to call C function with error handling.
             let result = catch_unwind(|| {
-                XOpenDisplay(std::ptr::null())
+                xlib::XOpenDisplay(std::ptr::null())
             }); 
 
             match result {
@@ -67,7 +67,7 @@ pub fn x11_supported() -> bool {
                         false
                     } else {
                         // Disconnect display before returning true
-                        XCloseDisplay(display);
+                        xlib::XCloseDisplay(display);
 
                         true
                     }

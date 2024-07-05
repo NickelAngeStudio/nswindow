@@ -52,36 +52,26 @@ pub mod manager;
 #[doc(hidden)] 
 pub mod window;
 
-/// Window properties
-#[doc(hidden)] 
-pub mod property; 
+pub mod keyboard;
+pub mod pointer; 
+pub mod display;
+pub mod event;
 
 /// Window builder
 #[doc(hidden)] 
 pub mod builder;
 
-// Hardware display information
-pub mod display;
 
-/// Possible events that can be given by the [WindowManager].
-#[doc(hidden)] 
-pub mod event;
 
 // Re-import
 pub use builder::WindowBuilder as WindowBuilder;
 pub use manager::WindowManager as WindowManager;
 pub use window::Window as Window;
-pub use property::WindowKeyboardMode as WindowKeyboardMode;
-pub use property::WindowPointerMode as WindowPointerMode;
-pub use property::WindowPointer as WindowPointer;
-pub use property::WindowCursor as WindowCursor;
-pub use property::WindowKeyboard as WindowKeyboard;
-pub use property::WindowFullScreenMode as WindowFullScreenMode;
-pub use property::WindowPosition as WindowPosition;
-pub use property::WindowRelativePosition as WindowRelativePosition;
-pub use property::WindowSize as WindowSize;
+pub use window::WindowFullScreenMode as WindowFullScreenMode;
+pub use window::WindowPosition as WindowPosition;
+pub use window::WindowRelativePosition as WindowRelativePosition;
+pub use window::WindowSize as WindowSize;
 pub use error::WindowError as WindowError;
-pub use event::WindowManagerEvent as WindowManagerEvent;
 
 /// Window handle used by the [WindowManager].
 pub type WindowHandle = *const usize;

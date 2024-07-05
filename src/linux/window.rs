@@ -22,22 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+use super::{wayland::window::WaylandWindow, x11::window::X11Window};
 
 
-use crate::{event::WindowManagerEvent, display::Displays};
+/// Match abstraction of possible linux Window.
+///
+/// Match abstraction are WAY faster that [dyn] vtable.
+pub(crate) enum LinuxWindow {
+
+    /// X11 linux window
+    X11(X11Window),
+
+    /// Wayland linux window
+    Wayland(WaylandWindow)
+
+}
+
+impl LinuxWindow {
+
+    //#[inline(always)]
 
 
-pub(crate) mod manager;
-pub(crate) mod window;
-pub(crate) mod keyboard;
-pub(crate) mod pointer;
-
-
-/// This function spawn a new thread and try to connect to wayland server to see if available.
-/// 
-/// TODO:Create thread
-/// 
-/// Return true if wayland server is available and supported. False otherwise.
-pub fn wayland_supported() -> bool { 
-    false
 }

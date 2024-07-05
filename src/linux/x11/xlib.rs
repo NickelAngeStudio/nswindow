@@ -23,21 +23,9 @@ SOFTWARE.
 */
 
 
-
-use crate::{event::WindowManagerEvent, display::Displays};
-
-
-pub(crate) mod manager;
-pub(crate) mod window;
-pub(crate) mod keyboard;
-pub(crate) mod pointer;
-
-
-/// This function spawn a new thread and try to connect to wayland server to see if available.
-/// 
-/// TODO:Create thread
-/// 
-/// Return true if wayland server is available and supported. False otherwise.
-pub fn wayland_supported() -> bool { 
-    false
-}
+// X11 Bindings
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+#![allow(unused)]
+include!(concat!(env!("OUT_DIR"), "/x11.rs"));

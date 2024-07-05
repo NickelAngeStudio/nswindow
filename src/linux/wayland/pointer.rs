@@ -22,22 +22,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+use crate::pointer::{WindowCursor, WindowPointerMode};
 
 
-use crate::{event::WindowManagerEvent, display::Displays};
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct WaylandPointer {
+    
+}
 
+impl WaylandPointer {
+    
+    pub fn set_mode(&mut self, mode : WindowPointerMode) {
+        todo!()
+    }
 
-pub(crate) mod manager;
-pub(crate) mod window;
-pub(crate) mod keyboard;
-pub(crate) mod pointer;
+    pub fn show(&mut self) {
+        todo!()
+    }
 
+    pub fn hide(&mut self) {
+        todo!()
+    }
 
-/// This function spawn a new thread and try to connect to wayland server to see if available.
-/// 
-/// TODO:Create thread
-/// 
-/// Return true if wayland server is available and supported. False otherwise.
-pub fn wayland_supported() -> bool { 
-    false
+    pub fn confine(&mut self) {
+        todo!()
+    }
+
+    pub fn release(&mut self) {
+        todo!()
+    }
+
+    pub fn set_cursor(&mut self, cursor : WindowCursor) {
+        todo!()
+    }
+
 }

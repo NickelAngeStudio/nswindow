@@ -22,22 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+use crate::{display::Displays, event::WindowManagerEvent};
 
 
-use crate::{event::WindowManagerEvent, display::Displays};
+pub struct WaylandWindowManager {
+    
+}
 
+impl WaylandWindowManager {
+    /// Create a new instance of WaylandWindowManager
+    pub fn new() -> WaylandWindowManager {
+        WaylandWindowManager {}
+    }
 
-pub(crate) mod manager;
-pub(crate) mod window;
-pub(crate) mod keyboard;
-pub(crate) mod pointer;
+    pub fn event(&self) -> Option<WindowManagerEvent> {
+        todo!()
+    }
 
-
-/// This function spawn a new thread and try to connect to wayland server to see if available.
-/// 
-/// TODO:Create thread
-/// 
-/// Return true if wayland server is available and supported. False otherwise.
-pub fn wayland_supported() -> bool { 
-    false
+    #[inline(always)]
+    pub fn displays(&self) -> &Displays {
+        todo!()
+    }
 }
