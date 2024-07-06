@@ -24,7 +24,7 @@ SOFTWARE.
 
 
 
-use crate::{ display::{Display, DisplayHandle}, WindowBuilder, WindowError, WindowHandle};
+use crate::{ display::{Display, DisplayHandle}, linux::pointer, WindowBuilder, WindowError, WindowHandle};
 
  
 
@@ -95,7 +95,6 @@ pub struct Window {
     #[cfg(target_os = "linux")]
     window : crate::linux::window::LinuxWindow,  
 
-
     /// Parent [WindowHandle]
     parent : Option<WindowHandle>,
 
@@ -149,8 +148,7 @@ impl Window {
         todo!()
     }
 
-
-    /// Close [Window], removing it from display.
+    /// Close [Window], removing it from display and clearing the ressources.
     pub fn close(&mut self) -> Result<bool, WindowError> {
         todo!()
     }
@@ -186,18 +184,35 @@ impl Window {
         todo!()
     }
 
+    /*
+    pointer
 
+    pointer_mut
 
+    keyboard
 
+    keyboard_mut
+
+    show_decoration
+
+    hide_decoration
+
+    minimize
+
+    maximize
+
+    set_fullscreen
+
+    */
     // Show window decoration
     // TODO:Rest of functions
 /*
     WindowPropertySet::Position(option) => self.set_position(option),
-    WindowPropertySet::ShowDecoration => self.show_decoration(),
-    WindowPropertySet::HideDecoration => self.hide_decoration(),
-    WindowPropertySet::Minimize => self.minimize(),
-    WindowPropertySet::Maximized => self.maximize(),
-    WindowPropertySet::Fullscreen(fsmode) => self.set_fullscreen(fsmode.clone()),
+    WindowPropertySet::ShowDecoration => self.(),
+    WindowPropertySet::HideDecoration => self.(),
+    WindowPropertySet::Minimize => self.(),
+    WindowPropertySet::Maximized => self.(),
+    WindowPropertySet::Fullscreen(fsmode) => self.(fsmode.clone()),
     WindowPropertySet::Restore => self.restore(),
     WindowPropertySet::Keyboard(kb_property) => self.set_keyboard_property(kb_property),
     WindowPropertySet::Pointer(p_property) => self.set_pointer_property(p_property),

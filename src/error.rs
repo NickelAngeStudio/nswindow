@@ -45,6 +45,11 @@ pub enum WindowError {
     /// Happens when a given [WindowSize](crate::WindowSize) is out of bound.
     WindowSizeOOB,
 
+    /// Happen when minimum [WindowSize](crate::WindowSize) is greater than maximum size.
+    WindowMinSizeBiggerThanMax,
+
+    
+
     /// Happens when trying to make a [Window](crate::Window) it's own parent.
     WindowParentSelf,
 
