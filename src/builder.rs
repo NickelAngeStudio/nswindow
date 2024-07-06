@@ -350,6 +350,16 @@ mod tests{
 
         
         // V2 | Compare values VS Allocated values.
+        let mut wkb = WindowKeyboard::new();
+        wkb.mode = WKB_MODE;
+        wkb.auto_repeat = WKB_REPEAT;
+
+        let mut wp = WindowPointer::new();
+        wp.mode = WP_MODE;
+        wp.confined = WP_CONFINED;
+        wp.visible = WP_VISIBLE;
+        wp.cursor = WP_CURSOR;
+        
         assert!(wb.title == TITLE.to_string());
         assert!(wb.min_size == MIN_SIZE);
         assert!(wb.max_size == MAX_SIZE);

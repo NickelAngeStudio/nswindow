@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 
-
+#[derive(Debug, PartialEq)]
 pub struct X11Window {
     
 }

@@ -22,6 +22,53 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-pub enum X11WindowFrame {
+use crate::frame::WindowFrameButtonMode;
 
+#[derive(Debug, PartialEq)]
+pub(crate) enum X11WindowFrame {
+
+    
+
+}
+
+impl X11WindowFrame {
+    #[inline(always)]
+    pub fn reset(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn show(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn hide(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn lock(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn unlock(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_button_min(&mut self, mode : WindowFrameButtonMode) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_button_max(&mut self, mode : WindowFrameButtonMode) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_button_close(&mut self, mode : WindowFrameButtonMode) {
+        todo!()
+    }
 }

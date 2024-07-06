@@ -133,6 +133,11 @@ impl Window {
         todo!()
     }
 
+     /// Set the [Window] icon from a [std::io::Read] source.
+     pub fn set_icon(&mut self, icon : Option<&dyn std::io::Read>) {
+        todo!()
+    }
+
     /// Returns true if [Window] if visible (show() was called)wm
     pub fn visible(&mut self) -> Result<bool, WindowError> {
         todo!()

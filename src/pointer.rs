@@ -40,7 +40,7 @@ const WP_DEFAULT_CURSOR : WindowCursor = WindowCursor::Normal;
 
 
 /// [Window](super::window::Window) pointer properties such as mode, position, etc.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct WindowPointer {
 
     /// Linux [WindowPointer] abstraction for calls. Is set as [Option] since [WindowBuilder] can use it.
@@ -90,7 +90,7 @@ impl WindowPointer {
             match_cfg! {
                 linux => {
                     match self.pointer {
-                        Some(mut lp) => lp.set_mode(mode),
+                        Some(ref mut lp) => lp.set_mode(mode),
                         None => {}, // Do nothing
                     }
                 },
@@ -114,7 +114,7 @@ impl WindowPointer {
             match_cfg! {
                 linux => {
                     match self.pointer {
-                        Some(mut lp) => lp.show(),
+                        Some(ref mut lp) => lp.show(),
                         None => {}, // Do nothing
                     }
                 },
@@ -133,7 +133,7 @@ impl WindowPointer {
             match_cfg! {
                 linux => {
                     match self.pointer {
-                        Some(mut lp) => lp.hide(),
+                        Some(ref mut lp) => lp.hide(),
                         None => {}, // Do nothing
                     }
                 },
@@ -158,7 +158,7 @@ impl WindowPointer {
             match_cfg! {
                 linux => {
                     match self.pointer {
-                        Some(mut lp) => lp.confine(),
+                        Some(ref mut lp) => lp.confine(),
                         None => {}, // Do nothing
                     }
                 },
@@ -177,7 +177,7 @@ impl WindowPointer {
             match_cfg! {
                 linux => {
                     match self.pointer {
-                        Some(mut lp) => lp.release(),
+                        Some(ref mut lp) => lp.release(),
                         None => {}, // Do nothing
                     }
                 },
@@ -203,7 +203,7 @@ impl WindowPointer {
             match_cfg! {
                 linux => {
                     match self.pointer {
-                        Some(mut lp) => lp.set_cursor(cursor),
+                        Some(ref mut lp) => lp.set_cursor(cursor),
                         None => {}, // Do nothing
                     }
                 },

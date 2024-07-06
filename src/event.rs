@@ -85,11 +85,11 @@ pub enum WindowEvent {
     /// Happens when Window is restored from minimized, maximized or fullscreen.
     Restored,
 
-    /// Happens when cursor enter Window.
-    CursorEnter,
+    /// Happens when pointer enter Window.
+    PointerEnter,
 
-    /// Happens when cursor leave Window.
-    CursorLeave,
+    /// Happens when pointer leave Window.
+    PointerLeave,
 
     /// Happens when Window gain focus.
     Focus,
@@ -97,14 +97,14 @@ pub enum WindowEvent {
     /// Happens when Window lose focus.
     Blur,
 
-    /// Happens when a close request is sent from the client.
-    RequestClose,
+    /// Happens when a user press on a overriden close button.
+    CloseButtonPressed,
 
-    /// Happens when a close request is sent from the client.
-    RequestMinimize,
+    /// Happens when a user press on a overriden minimize button.
+    MinimizeButtonPressed,
 
-    /// Happens when a close request is sent from the client.
-    RequestMazimize,
+    /// Happens when a user press on a overriden maximize button.
+    MaximizeButtonPressed,
 
     /// Happens when a window was closed.
     Closed,

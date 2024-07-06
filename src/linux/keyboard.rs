@@ -31,7 +31,7 @@ use super::wayland::keyboard::WaylandKeyboard;
 /// Match abstraction of possible linux Window keyboard properties.
 ///
 /// Match abstraction are WAY faster that [dyn] vtable.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub(crate) enum LinuxKeyboard {
 
         /// X11 linux window

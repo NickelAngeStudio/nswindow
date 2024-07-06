@@ -24,32 +24,21 @@ SOFTWARE.
 
 //! Properties of the border surrounding a [Window](crate::Window)
 
+use nscfg::match_cfg;
+
 /// [WindowFrame] default visibility.
 const WF_DEFAULT_VISIBILITY : bool = true;
 
+/// [WindowFrame] default resize toggle
 const WF_DEFAULT_RESIZABLE : bool = true;
 
-const WF_DEFAULT_ICON : WindowFrameIcon = WindowFrameIcon::Default;
-
-const WF_DEFAULT_BUTTON : WindowFrameButton = WindowFrameButton::Default;
-
-
-/// Mode of the icon showed on the [WindowFrame].
-pub enum WindowFrameIcon {
-    /// Icon will be showed according to default OS settings.
-    Default,
-
-    /// Icon will be hidden (if possible).
-    Hidden,
-
-    /// Icon has been changed via 
-    Custom,
-}
-
+/// [WindowFrame] default mode for all buttons.
+const WF_DEFAULT_BUTTON : WindowFrameButtonMode = WindowFrameButtonMode::Default;
 
 
 /// Mode of a button on the [WindowFrame].
-pub enum WindowFrameButton {
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum WindowFrameButtonMode {
     /// Button will be showed as default OS settings and act according to OS parameters.
     Default,
 
@@ -63,9 +52,9 @@ pub enum WindowFrameButton {
     /// Events will be generated instead.
     /// 
     /// # Events
-    /// - [`WindowEvent::RequestMinimize`](crate::event::WindowEvent::RequestMinimize) happens when user click the min button.
-    /// - [`WindowEvent::RequestMazimize`](crate::event::WindowEvent::RequestMinimize) happens when user click the max button.
-    /// - [`WindowEvent::RequestClose`](crate::event::WindowEvent::RequestMinimize) happens when user click the close button.
+    /// - [`WindowEvent::MinimizeButtonPressed`](crate::event::WindowEvent::MinimizeButtonPressed) happens when user click the min button.
+    /// - [`WindowEvent::MaximizeButtonPressed`](crate::event::WindowEvent::MaximizeButtonPressed) happens when user click the max button.
+    /// - [`WindowEvent::CloseButtonPressed`](crate::event::WindowEvent::CloseButtonPressed) happens when user click the close button.
     Overriden,
 }
 
@@ -87,17 +76,14 @@ pub struct WindowFrame {
     /// Can the frame be used to resize window.
     resizable : bool,
 
-    /// Frame icon mode
-    icon : WindowFrameIcon,
-
     /// Mode of the min button 
-    min_button : WindowFrameButton,
+    min_button : WindowFrameButtonMode,
 
     /// Mode of the max button
-    max_button : WindowFrameButton,
+    max_button : WindowFrameButtonMode,
 
     /// Mode of the close button
-    close_button : WindowFrameButton,
+    close_button : WindowFrameButtonMode,
 
 }
 
@@ -108,20 +94,222 @@ impl WindowFrame {
             frame: None, 
             visible: WF_DEFAULT_VISIBILITY, 
             resizable: WF_DEFAULT_RESIZABLE, 
-            icon: WF_DEFAULT_ICON, 
             min_button: WF_DEFAULT_BUTTON, 
             max_button: WF_DEFAULT_BUTTON, 
             close_button: WF_DEFAULT_BUTTON 
         }
     }
-
-    /// Set the [WindowFrame] icon. If [WindowFrameIcon::Custom], an implemented [std::io::Read] must be given.
-    pub fn set_icon(&mut self, mode : WindowFrameIcon, read : Option<&dyn std::io::Read>) {
-        todo!()
+    
+    /// Returns true if the [WindowFrame] is visible around the [Window](crate::Window).
+    pub fn visible(&self) -> bool {
+        self.visible
     }
+
+    /// Show the [WindowFrame] around the [Window](crate::Window). Does nothing if already visible.
+    pub fn show(&mut self) {
+
+        if !self.visible {
+
+            self.visible = true;
+
+            match_cfg! {
+                linux => {
+                    match self.frame {
+                        Some(ref mut wf) => wf.show(),
+                        None => {},
+                    }
+                },
+                _ => {
+                    unimplemented!()
+                }
+            }
+
+        }
+
+    }
+
+    /// Hide the [WindowFrame] around the [Window](crate::Window). Does nothing if already hidden.
+    pub fn hide(&mut self) {
+
+        if self.visible {
+
+            self.visible = false;
+
+            match_cfg! {
+                linux => {
+                    match self.frame {
+                        Some(ref mut wf) => wf.hide(),
+                        None => {},
+                    }
+                },
+                _ => {
+                    unimplemented!()
+                }
+            }
+
+        }
+
+    }
+
+    /// Returns true if the [WindowFrame] border can be used to resize [Window](crate::Window).
+    pub fn resizable(&self)  -> bool {
+        self.resizable
+    }
+
+    /// Prevent the [WindowFrame] from been resized by the user. Does nothing if already locked.
+    pub fn lock(&mut self) {
+
+        if self.resizable {
+
+            self.resizable = false;
+
+            match_cfg! {
+                linux => {
+                    match self.frame {
+                        Some(ref mut wf) => wf.lock(),
+                        None => {},
+                    }
+                },
+                _ => {
+                    unimplemented!()
+                }
+            }
+
+        }
+
+    }
+
+    /// Make the [WindowFrame] resizable by the user. Does nothing if already unlocked.
+    pub fn unlock(&mut self) {
+        
+        if !self.resizable {
+
+            self.resizable = true;
+
+            match_cfg! {
+                linux => {
+                    match self.frame {
+                        Some(ref mut wf) => wf.unlock(),
+                        None => {},
+                    }
+                },
+                _ => {
+                    unimplemented!()
+                }
+            }
+
+        }
+
+    }
+
+    /// Returns [WindowFrame] minimum [WindowFrameButtonMode]. 
+    pub fn button_min(&self) -> WindowFrameButtonMode {
+        self.min_button
+    }
+
+    /// Set a new [WindowFrameButtonMode] for the minimum button. Does nothing is same mode as before.
+    pub fn set_button_min(&mut self, mode : WindowFrameButtonMode) {
+
+        if self.min_button != mode {
+
+            self.min_button = mode;
+
+            match_cfg! {
+                linux => {
+                    match self.frame {
+                        Some(ref mut wf) => wf.set_button_min(mode),
+                        None => {},
+                    }
+                },
+                _ => {
+                    unimplemented!()
+                }
+            }
+
+        }
+
+    }
+
+    /// Returns [WindowFrame] maximum [WindowFrameButtonMode]. 
+    pub fn button_max(&self) -> WindowFrameButtonMode {
+        self.max_button
+    }
+
+    /// Set a new [WindowFrameButtonMode] for the maximum button. Does nothing is same mode as before.
+    pub fn set_button_max(&mut self, mode : WindowFrameButtonMode) {
+
+        if self.max_button != mode {
+
+            self.max_button = mode;
+
+            match_cfg! {
+                linux => {
+                    match self.frame {
+                        Some(ref mut wf) => wf.set_button_max(mode),
+                        None => {},
+                    }
+                },
+                _ => {
+                    unimplemented!()
+                }
+            }
+
+        }
+
+
+    }
+
+    /// Returns [WindowFrame] close [WindowFrameButtonMode]. 
+    pub fn button_close(&self) -> WindowFrameButtonMode {
+        self.close_button
+    }
+
+    /// Set a new [WindowFrameButtonMode] for the close button. Does nothing is same mode as before.
+    pub fn set_button_close(&mut self, mode : WindowFrameButtonMode) {
+
+        if self.close_button != mode {
+
+            self.close_button = mode;
+
+            match_cfg! {
+                linux => {
+                    match self.frame {
+                        Some(ref mut wf) => wf.set_button_close(mode),
+                        None => {},
+                    }
+                },
+                _ => {
+                    unimplemented!()
+                }
+            }
+
+        }
+
+    }
+
+   
 
     /// Reset the [WindowFrame] to default settings.
     pub fn reset(&mut self) {
+        self.visible = WF_DEFAULT_VISIBILITY;
+        self.resizable = WF_DEFAULT_RESIZABLE;
+        self.min_button = WF_DEFAULT_BUTTON;
+        self.max_button = WF_DEFAULT_BUTTON;
+        self.close_button = WF_DEFAULT_BUTTON;
+
+        match_cfg! {
+            linux => {
+                match self.frame {
+                    Some(ref mut wf) => wf.reset(),
+                    None => {},
+                }
+            },
+            _ => {
+                unimplemented!()
+            }
+        }
+        
+
 
     }
 }
@@ -132,7 +320,26 @@ impl WindowFrame {
 *************/
 #[cfg(test)]
 mod tests{
+    use crate::frame::{WindowFrameButtonMode, WF_DEFAULT_BUTTON, WF_DEFAULT_RESIZABLE};
+
     use super::WindowFrame;
+
+    pub fn test_window_frame_default(wf : &WindowFrame) {
+
+        assert!(wf.frame == None);
+        assert!(wf.visible == WF_DEFAULT_RESIZABLE);
+        assert!(wf.resizable == WF_DEFAULT_RESIZABLE);
+        assert!(wf.min_button == WF_DEFAULT_BUTTON);
+        assert!(wf.max_button == WF_DEFAULT_BUTTON);
+        assert!(wf.close_button == WF_DEFAULT_BUTTON);
+
+        assert!(wf.visible() == WF_DEFAULT_RESIZABLE);
+        assert!(wf.resizable() == WF_DEFAULT_RESIZABLE);
+        assert!(wf.button_min() == WF_DEFAULT_BUTTON);
+        assert!(wf.button_max() == WF_DEFAULT_BUTTON);
+        assert!(wf.button_close() == WF_DEFAULT_BUTTON);
+
+    }
 
 
     /// Unit tests [super::WindowFrame] default values.
@@ -141,10 +348,59 @@ mod tests{
     /// V1 | Test each value on creation vs default values.
     #[test]
     fn ut_window_frame_default() {
+        let wf = WindowFrame::new();
+        test_window_frame_default(&wf);
+    }
+
+    /// Unit tests [super::WindowFrame] values update.
+    ///
+    /// # Verification(s)
+    /// V1 | Modify each value and compare.
+    /// V2 | Reset and verify default values
+    #[test]
+    fn ut_window_frame_update() {
         let mut wf = WindowFrame::new();
 
-        wf.set_icon(super::WindowFrameIcon::Default, None);
-        
+
+        const BTNMIN : WindowFrameButtonMode = WindowFrameButtonMode::Disable;
+        const BTNMAX : WindowFrameButtonMode = WindowFrameButtonMode::Hidden;
+        const BTNCLOSE : WindowFrameButtonMode = WindowFrameButtonMode::Overriden;
+
+
+        // V1 | Modify each value and compare.
+
+        // Visibility
+        assert!(wf.visible);
+        wf.hide();
+        assert!(!wf.visible && !wf.visible());
+        wf.show();
+        assert!(wf.visible && wf.visible);
+
+        // Resizable
+        assert!(wf.resizable);
+        wf.lock();
+        assert!(!wf.resizable && !wf.resizable());
+        wf.unlock();
+        assert!(wf.resizable && wf.resizable());
+
+        // Button min
+        wf.set_button_min(BTNMIN);
+        assert!(wf.min_button == BTNMIN && wf.button_min() == BTNMIN);
+
+        // Button max
+        wf.set_button_max(BTNMAX);
+        assert!(wf.max_button == BTNMAX && wf.button_max() == BTNMAX);
+
+        // Button close
+        wf.set_button_close(BTNCLOSE);
+        assert!(wf.close_button == BTNCLOSE && wf.button_close() == BTNCLOSE);
+
+        // Make sure all buttons are different
+        assert!(wf.min_button != wf.max_button && wf.min_button != wf.close_button && wf.min_button != wf.close_button && wf.max_button != wf.close_button);
+
+        // V2 | Reset and verify default values
+        wf.reset();
+        test_window_frame_default(&wf);
 
     }
 
