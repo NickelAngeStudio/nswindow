@@ -30,6 +30,12 @@ const WB_DEFAULT_TITLE : &str = "New window";
 /// Default size of [Window].
 const WB_DEFAULT_SIZE : WindowSize = WindowSize { width: 640, height: 480 };
 
+/// Default minimum size of [Window]. Used for user resizing.
+const WB_DEFAULT_MIN_SIZE : WindowSize = WindowSize { width: 320, height: 240 };
+
+/// Default maximum size of [Window]. Used for user resizing.
+const WB_DEFAULT_MAX_SIZE : WindowSize = WindowSize { width: u16::MAX as u32, height: u16::MAX as u32 };
+
 /// Default position of [Window].
 const WB_DEFAULT_POSITION : WindowRelativePosition = WindowRelativePosition::PrimaryCenter;
 
@@ -57,6 +63,12 @@ pub struct WindowBuilder {
 
     /// Title of the [Window]
     title : String,
+
+    /// Minimum size of the [Window].
+    min_size : WindowSize,
+
+    /// Maximum size of the [Window].
+    max_size : WindowSize,
 
     /// Size of the [Window]
     size : WindowSize,
@@ -96,6 +108,8 @@ impl WindowBuilder {
     pub fn new() -> WindowBuilder {
         WindowBuilder { 
             title: WB_DEFAULT_TITLE.to_string(), 
+            min_size : WB_DEFAULT_MIN_SIZE,
+            max_size : WB_DEFAULT_MAX_SIZE,
             size: WB_DEFAULT_SIZE, 
             position: WB_DEFAULT_POSITION, 
             parent: WB_DEFAULT_PARENT, 
@@ -115,10 +129,29 @@ impl WindowBuilder {
         self
     }
 
+    /// Set the minimum [WindowSize] a user can shrink the window to.
+    /// 
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::WindowMinSizeBiggerThanMax`] if min `size` is bigger than `max` size.
+    pub fn size_min(&mut self, size : WindowSize) -> &mut Self {
+        self.min_size = size;
+        self
+    }
+
+     /// Set the maximum [WindowSize] a user can enlarge the window to.
+    /// 
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::WindowMinSizeBiggerThanMax`] if min `size` is bigger than `max` size.
+    pub fn size_max(&mut self, size : WindowSize) -> &mut Self {
+        self.max_size = size;
+        self
+    }
+
     /// Set the [WindowSize] of the new window.
     /// 
     /// # Errors
-    /// [WindowBuilder::build] returns [`WindowError::WindowSizeOOB`] if `size` isn't between [Desktop::min](crate::display::Desktop::min) and [Desktop::max](crate::display::Desktop::max).
+    /// [WindowBuilder::build] returns [`WindowError::WindowSizeOOB`] if `size` isn't between [Desktop::min](crate::display::Desktop::min) and [Desktop::max](crate::display::Desktop::max)
+    /// and / or `size` isn't between [WindowBuilder::size_min()] and [WindowBuilder::size_max()].
     pub fn size(&mut self, size : WindowSize) -> &mut Self {
         self.size = size;
         self
@@ -191,6 +224,8 @@ impl WindowBuilder {
     /// Reset the [WindowBuilder] with default values. 
     pub fn reset(&mut self) -> &mut Self {
         self.title = WB_DEFAULT_TITLE.to_string();
+        self.min_size = WB_DEFAULT_MIN_SIZE;
+        self.max_size = WB_DEFAULT_MAX_SIZE;
         self.size = WB_DEFAULT_SIZE;
         self.position = WB_DEFAULT_POSITION; 
         self.parent = WB_DEFAULT_PARENT;
@@ -223,10 +258,7 @@ impl WindowBuilder {
 *************/
 #[cfg(test)]
 mod tests{
-    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MINIMIZED, WB_DEFAULT_PARENT, 
-        WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, WindowBuilder, 
-        pointer::WindowCursor, WindowFullScreenMode, WindowHandle, keyboard::WindowKeyboard, keyboard::WindowKeyboardMode, 
-        pointer::WindowPointer, pointer::WindowPointerMode, WindowPosition, WindowRelativePosition, WindowSize};
+    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MAX_SIZE, WB_DEFAULT_MINIMIZED, WB_DEFAULT_MIN_SIZE, WB_DEFAULT_PARENT, WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, keyboard::{WindowKeyboard, WindowKeyboardMode}, pointer::{WindowCursor, WindowPointer, WindowPointerMode}, WindowBuilder, WindowFullScreenMode, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
 
     /// Test default values of WindowBuilder
     fn test_defaults(wb : &WindowBuilder) {
@@ -234,6 +266,8 @@ mod tests{
         let wp = WindowPointer::new();
 
         assert!(wb.title == WB_DEFAULT_TITLE.to_string());
+        assert!(wb.min_size == WB_DEFAULT_MIN_SIZE);
+        assert!(wb.max_size == WB_DEFAULT_MAX_SIZE);
         assert!(wb.size == WB_DEFAULT_SIZE);
         assert!(wb.position == WB_DEFAULT_POSITION);
         assert!(wb.parent == WB_DEFAULT_PARENT);
@@ -271,6 +305,8 @@ mod tests{
     #[test]
     fn ut_window_builder_modifications() {
         const TITLE : &str = "TEST TITLE";
+        const MIN_SIZE : WindowSize = WindowSize { width: 111, height: 222 };
+        const MAX_SIZE : WindowSize = WindowSize { width: 5555, height: 6666 };
         const SIZE : WindowSize = WindowSize { width: 123, height: 456 };
         const POSITION : WindowRelativePosition = WindowRelativePosition::Primary(WindowPosition { x: 987, y: 345 });
 
@@ -299,6 +335,8 @@ mod tests{
         // V1 | Allocate value to each parameter.
         let mut wb = WindowBuilder::new();
                 wb.title(TITLE)
+                .size_min(MIN_SIZE)
+                .size_max(MAX_SIZE)
                 .size(SIZE)
                 .position(POSITION)
                 .pointer(wp)
@@ -312,7 +350,19 @@ mod tests{
 
         
         // V2 | Compare values VS Allocated values.
+        let mut wkb = WindowKeyboard::new();
+        wkb.mode = WKB_MODE;
+        wkb.auto_repeat = WKB_REPEAT;
+
+        let mut wp = WindowPointer::new();
+        wp.mode = WP_MODE;
+        wp.confined = WP_CONFINED;
+        wp.visible = WP_VISIBLE;
+        wp.cursor = WP_CURSOR;
+        
         assert!(wb.title == TITLE.to_string());
+        assert!(wb.min_size == MIN_SIZE);
+        assert!(wb.max_size == MAX_SIZE);
         assert!(wb.size == SIZE);
         assert!(wb.position == POSITION);
         assert!(wb.parent == PARENT);

@@ -33,6 +33,9 @@ pub(crate) mod manager;
 /// X11 Window handle
 pub(crate) mod window;
 
+/// X11 Window frame management
+pub(crate) mod frame;
+
 /// X11 Screen informations
 pub(crate) mod display;
 

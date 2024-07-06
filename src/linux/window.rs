@@ -28,6 +28,7 @@ use super::{wayland::window::WaylandWindow, x11::window::X11Window};
 /// Match abstraction of possible linux Window.
 ///
 /// Match abstraction are WAY faster that [dyn] vtable.
+#[derive(Debug, PartialEq)]
 pub(crate) enum LinuxWindow {
 
     /// X11 linux window
@@ -40,7 +41,9 @@ pub(crate) enum LinuxWindow {
 
 impl LinuxWindow {
 
+    // For set_icon : http://www.leonerd.org.uk/code/xseticon/
+
     //#[inline(always)]
 
-
+    // 
 }

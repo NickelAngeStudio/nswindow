@@ -22,50 +22,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::keyboard::WindowKeyboardMode;
+use crate::frame::WindowFrameButtonMode;
 
-use super::x11::keyboard::X11Keyboard;
-
-use super::wayland::keyboard::WaylandKeyboard;
-
-/// Match abstraction of possible linux Window keyboard properties.
-///
-/// Match abstraction are WAY faster that [dyn] vtable.
 #[derive(Debug, PartialEq)]
-pub(crate) enum LinuxKeyboard {
-
-        /// X11 linux window
-        X11(X11Keyboard),
-
-        /// Wayland linux window
-        Wayland(WaylandKeyboard)
+pub(crate) enum WaylandWindowFrame {
 
 }
 
-impl LinuxKeyboard {
-
+impl WaylandWindowFrame {
     #[inline(always)]
-    pub fn set_mode(&mut self, mode : WindowKeyboardMode) {
-        match self {
-            LinuxKeyboard::X11(wkb) => wkb.set_mode(mode),
-            LinuxKeyboard::Wayland(wkb) => wkb.set_mode(mode),
-        }
+    pub fn reset(&mut self) {
+        todo!()
     }
 
     #[inline(always)]
-    pub fn enable_repeat(&mut self) {
-        match self {
-            LinuxKeyboard::X11(wkb) => wkb.enable_repeat(),
-            LinuxKeyboard::Wayland(wkb) => wkb.enable_repeat(),
-        }
+    pub fn show(&mut self) {
+        todo!()
     }
 
     #[inline(always)]
-    pub fn disable_repeat(&mut self) {
-        match self {
-            LinuxKeyboard::X11(wkb) => wkb.disable_repeat(),
-            LinuxKeyboard::Wayland(wkb) => wkb.disable_repeat(),
-        }
+    pub fn hide(&mut self) {
+        todo!()
     }
 
+    #[inline(always)]
+    pub fn lock(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn unlock(&mut self) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_button_min(&mut self, mode : WindowFrameButtonMode) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_button_max(&mut self, mode : WindowFrameButtonMode) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_button_close(&mut self, mode : WindowFrameButtonMode) {
+        todo!()
+    }
 }

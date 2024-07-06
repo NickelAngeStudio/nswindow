@@ -29,7 +29,7 @@ use super::{wayland::pointer::WaylandPointer, x11::pointer::X11Pointer};
 /// Match abstraction of possible linux Window managers pointers.
 ///
 /// Match abstraction are WAY faster that [dyn] vtable.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub(crate) enum LinuxPointer {
 
         /// X11 linux window

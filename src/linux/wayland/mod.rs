@@ -31,6 +31,7 @@ pub(crate) mod manager;
 pub(crate) mod window;
 pub(crate) mod keyboard;
 pub(crate) mod pointer;
+pub(crate) mod frame;
 
 
 /// This function spawn a new thread and try to connect to wayland server to see if available.

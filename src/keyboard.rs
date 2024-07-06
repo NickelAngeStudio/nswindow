@@ -33,7 +33,7 @@ const WKB_DEFAULT_MODE : WindowKeyboardMode = WindowKeyboardMode::Direct;
 const WKB_DEFAULT_REPEAT : bool = false;
 
 /// [Window](crate::Window) keyboard properties.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct WindowKeyboard {
 
     /// Linux [WindowKeyboard] abstraction for calls. Is set as [Option] since [WindowBuilder] can use it.
@@ -68,7 +68,7 @@ impl WindowKeyboard {
             match_cfg! {
                 linux => {
                     match self.keyboard {
-                        Some(mut wkb) => wkb.set_mode(mode),
+                        Some(ref mut wkb) => wkb.set_mode(mode),
                         None => {},
                     }
                 },
@@ -90,7 +90,7 @@ impl WindowKeyboard {
             match_cfg! {
                 linux => {
                     match self.keyboard {
-                        Some(mut wkb) => wkb.enable_repeat(),
+                        Some(ref mut wkb) => wkb.enable_repeat(),
                         None => {},
                     }
                 },
@@ -108,7 +108,7 @@ impl WindowKeyboard {
             match_cfg! {
                 linux => {
                     match self.keyboard {
-                        Some(mut wkb) => wkb.disable_repeat(),
+                        Some(ref mut wkb) => wkb.disable_repeat(),
                         None => {},
                     }
                 },
