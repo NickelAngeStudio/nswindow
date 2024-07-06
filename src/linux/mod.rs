@@ -25,6 +25,7 @@ SOFTWARE.
 use wayland::window::WaylandWindow;
 use x11::window::X11Window;
 
+pub(crate) mod frame;
 pub(crate) mod manager;
 pub(crate) mod window;
 pub(crate) mod pointer;

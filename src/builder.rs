@@ -224,6 +224,8 @@ impl WindowBuilder {
     /// Reset the [WindowBuilder] with default values. 
     pub fn reset(&mut self) -> &mut Self {
         self.title = WB_DEFAULT_TITLE.to_string();
+        self.min_size = WB_DEFAULT_MIN_SIZE;
+        self.max_size = WB_DEFAULT_MAX_SIZE;
         self.size = WB_DEFAULT_SIZE;
         self.position = WB_DEFAULT_POSITION; 
         self.parent = WB_DEFAULT_PARENT;
@@ -303,6 +305,8 @@ mod tests{
     #[test]
     fn ut_window_builder_modifications() {
         const TITLE : &str = "TEST TITLE";
+        const MIN_SIZE : WindowSize = WindowSize { width: 111, height: 222 };
+        const MAX_SIZE : WindowSize = WindowSize { width: 5555, height: 6666 };
         const SIZE : WindowSize = WindowSize { width: 123, height: 456 };
         const POSITION : WindowRelativePosition = WindowRelativePosition::Primary(WindowPosition { x: 987, y: 345 });
 
@@ -331,6 +335,8 @@ mod tests{
         // V1 | Allocate value to each parameter.
         let mut wb = WindowBuilder::new();
                 wb.title(TITLE)
+                .size_min(MIN_SIZE)
+                .size_max(MAX_SIZE)
                 .size(SIZE)
                 .position(POSITION)
                 .pointer(wp)
@@ -345,6 +351,8 @@ mod tests{
         
         // V2 | Compare values VS Allocated values.
         assert!(wb.title == TITLE.to_string());
+        assert!(wb.min_size == MIN_SIZE);
+        assert!(wb.max_size == MAX_SIZE);
         assert!(wb.size == SIZE);
         assert!(wb.position == POSITION);
         assert!(wb.parent == PARENT);

@@ -22,23 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+use super::{wayland::frame::WaylandWindowFrame, x11::frame::X11WindowFrame};
 
+pub(crate) enum LinuxWindowFrame {
+     /// X11 linux window frame
+     X11(X11WindowFrame),
 
-use crate::{event::WindowManagerEvent, display::Displays};
-
-
-pub(crate) mod manager;
-pub(crate) mod window;
-pub(crate) mod keyboard;
-pub(crate) mod pointer;
-pub(crate) mod frame;
-
-
-/// This function spawn a new thread and try to connect to wayland server to see if available.
-/// 
-/// TODO:Create thread
-/// 
-/// Return true if wayland server is available and supported. False otherwise.
-pub fn wayland_supported() -> bool { 
-    false
+     /// Wayland linux window frame
+     Wayland(WaylandWindowFrame)
 }

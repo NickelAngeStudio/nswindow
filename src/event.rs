@@ -98,7 +98,13 @@ pub enum WindowEvent {
     Blur,
 
     /// Happens when a close request is sent from the client.
-    CloseRequest,
+    RequestClose,
+
+    /// Happens when a close request is sent from the client.
+    RequestMinimize,
+
+    /// Happens when a close request is sent from the client.
+    RequestMazimize,
 
     /// Happens when a window was closed.
     Closed,
