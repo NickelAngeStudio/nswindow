@@ -91,6 +91,12 @@ impl WindowManager {
         todo!()
     }
 
+    /// Rebuild a [Window] from a [WindowHandle] and a [WindowBuilder].
+    pub(crate) fn rebuild(&mut self, handle : WindowHandle, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
+
+
     /// Poll an event from the window manager.
     /// 
     /// Returns Some(WindowManagerEvent) if any, [Option::None] if no event.
@@ -116,6 +122,24 @@ impl WindowManager {
     pub fn window_mut(&mut self, window : WindowHandle) -> Result<&mut Window, WindowError> {
         self.wm.window_mut(window)
     }
+
+    /// Close the [Window] of the [WindowHandle], removing it from display and clearing the ressources.
+    /// 
+    /// [WindowHandle] will be invalid if invoked.
+    pub fn close(&mut self, window : WindowHandle) -> Result<bool, WindowError> {
+        todo!()
+    }
+
+    /// Set a [Window] parent.
+    /// 
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::InvalidWindowHandle`] if [WindowHandle] doesn't refer to any [Window].
+    /// [WindowBuilder::rebuild] returns [`WindowError::WindowParentSelf`] if [WindowHandle] if the same as the [Window] itself.
+    /// [WindowBuilder::build] returns [`WindowError::WindowParentLoop`] if a parent loop would occur upon creation.
+    pub fn set_parent(&self, child : WindowHandle, parent : Option<WindowHandle>) -> Result<bool, WindowError> {
+        todo!()
+    }
+
 
     /// Get the client screens informations. 
     #[inline(always)]

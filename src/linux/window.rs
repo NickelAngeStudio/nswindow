@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+use crate::{WindowBuilder, WindowError, WindowFullScreenMode, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
+
 use super::{wayland::window::WaylandWindow, x11::window::X11Window};
 
 
@@ -41,9 +43,72 @@ pub(crate) enum LinuxWindow {
 
 impl LinuxWindow {
 
-    // For set_icon : http://www.leonerd.org.uk/code/xseticon/
+    
+    #[inline(always)]
+    pub fn set_title(&mut self, title : &str) -> Result<bool, WindowError>{
+        todo!()
+    }
 
-    //#[inline(always)]
+    #[inline(always)]
+    pub fn set_size(&mut self, size : WindowSize) -> Result<bool, WindowError> {
+        todo!()
+    }
 
-    // 
+    #[inline(always)]
+    pub fn set_size_min(&mut self, size : WindowSize) -> Result<bool, WindowError> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_size_max(&mut self, size : WindowSize) -> Result<bool, WindowError> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_icon(&mut self, icon : Option<&mut dyn std::io::Read>) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_taskbar(&self, show : bool) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn restore(&mut self) -> Result<bool, WindowError> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn show(&mut self) -> Result<bool, WindowError> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn hide(&mut self) -> Result<bool, WindowError> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_position(&mut self, position : WindowRelativePosition) -> Result<WindowPosition, WindowError> {
+        todo!()
+    }
+
+
+    #[inline(always)]
+    pub fn set_fullscreen(&mut self, fsmode : WindowFullScreenMode) -> &mut Self {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn minimize(&mut self)  {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn maximize(&mut self) {
+        todo!()
+    }
+
+    
 }

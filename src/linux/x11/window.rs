@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// For set_icon : http://www.leonerd.org.uk/code/xseticon/
 
 #[derive(Debug, PartialEq)]
 pub struct X11Window {

@@ -5,9 +5,9 @@ edition = "2021"
 authors = ["NickelAnge.Studio <rust@nickelange.studio>"]
 description = "Nifty and Simple Windows allow easy opening and manipulation of system windows.."
 license = "MIT"
-repository = "https://github.com/NickelAngeStudio/srml"
-keywords = ["window", "frame", "win", "surface", "view"]
-categories = ["multimedia", "game-development"]
+repository = "https://github.com/NickelAngeStudio/nswindow"
+keywords = ["window", "win", "manager", "gui", "view"]
+categories = ["gui", "game-development"]
 readme = "README.md"
 
 # List of excluded files
@@ -24,9 +24,8 @@ exclude = [
 ]
 
 [features]
-
-# Window thread will be locked until an event occurred. Better for RETAINED gui and non multimedia application.
-nswindow_application = []
+# Only support 1 window. Remove all extra code and faster for games.
+nswindow_single_optimized = []
 
 [dependencies]
 nscfg = "1.0.0"

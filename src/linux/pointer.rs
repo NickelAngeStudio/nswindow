@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::pointer::{WindowCursor, WindowPointerMode};
+use crate::{pointer::{WindowCursor, WindowPointerMode, WindowPointerPosition}, WindowError};
 
 use super::{wayland::pointer::WaylandPointer, x11::pointer::X11Pointer};
 
@@ -87,6 +87,22 @@ impl LinuxPointer {
         match self {
             LinuxPointer::X11(lp) => lp.set_cursor(cursor),
             LinuxPointer::Wayland(lp) => lp.set_cursor(cursor),
+        }
+    }
+
+    #[inline(always)]
+    pub fn position(&self) -> Option<WindowPointerPosition> {
+        match self {
+            LinuxPointer::X11(lp) => lp.position(),
+            LinuxPointer::Wayland(lp) => lp.position(),
+        }
+    }
+
+    #[inline(always)]
+    pub fn set_position(&mut self, position : WindowPointerPosition) -> Result<bool, WindowError> {
+        match self {
+            LinuxPointer::X11(lp) => lp.set_position(position),
+            LinuxPointer::Wayland(lp) => lp.set_position(position),
         }
     }
 
