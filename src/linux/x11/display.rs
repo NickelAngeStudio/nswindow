@@ -25,7 +25,7 @@ SOFTWARE.
 
 use std::ptr::null_mut;
 
-use crate::{display::{self, Desktop, Display, DisplayDesktopPosition, DisplayRefreshRate, DisplayResolution, DisplaySize, DisplaySupportedResolution, Displays}, error::WindowError};
+use crate::{display::{self, Desktop, Display, DisplayDesktopPosition, DisplayHandle, DisplayRefreshRate, DisplayResolution, DisplaySizeMM, DisplaySupportedResolution, Displays}, error::WindowError};
 
 //use super::Display;
 
@@ -48,12 +48,14 @@ pub(crate) fn x11Displays() -> Result<Displays, WindowError> {
                 Ok(out_str) => {
                     let mut list : Vec<Display> = Vec::new();
                     let mut desktop : Option<Desktop> = None;
+                    let mut handle : DisplayHandle = 0;
 
                     for line in out_str.split("\n") {
                         if line.contains("Screen") { // Desktop entry
                             desktop = Some(fetch_desktop(line));
                         } else if line.contains("connected") && !line.contains("disconnected")  {  // Display entry
-                            list.push(fetch_display(line));
+                            list.push(fetch_display(handle, line));
+                            handle += 1;
                         } else if !line.contains("disconnected") && line.len() > 2 {  // Supported entry
                             let last = list.len() - 1;
                             fetch_supported(&mut list[last], line);
@@ -95,7 +97,7 @@ fn fetch_desktop(line : &str) -> Desktop {
 }
 
 /// Fetch display from line
-fn fetch_display(line : &str) -> Display {
+fn fetch_display(handle : DisplayHandle, line : &str) -> Display {
 
     // Is display primary?
     let primary = line.contains("primary");
@@ -118,10 +120,11 @@ fn fetch_display(line : &str) -> Display {
     // Size is the last 2 information.
     while !infos.next().unwrap().contains(")") {};
 
-    let size = DisplaySize { width: infos.next().unwrap().replace("mm", "").parse::<usize>().unwrap(),
+    let size = DisplaySizeMM { width: infos.next().unwrap().replace("mm", "").parse::<usize>().unwrap(),
         height: infos.nth(1).unwrap().replace("mm", "").parse::<usize>().unwrap() };
 
     Display { 
+        handle,
         identifier, 
         size, 
         position, 

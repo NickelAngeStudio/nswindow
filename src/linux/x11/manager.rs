@@ -83,7 +83,12 @@ impl X11WindowManager {
     
 
     #[inline(always)]
-    pub fn event(&self) -> Option<WindowManagerEvent> {
+    pub fn event(&self) -> Option<&WindowManagerEvent> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn event_wait(&self) -> &WindowManagerEvent {
         todo!()
     }
 

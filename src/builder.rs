@@ -278,8 +278,8 @@ impl WindowBuilder {
     }
 
     /// Rebuild a [Window] from the [WindowBuilder] parameters.
-    pub fn rebuild(&mut self, wm : &mut WindowManager, handle : WindowHandle) -> Result<WindowHandle, WindowError> {
-        wm.rebuild(handle, self)
+    pub fn rebuild(&mut self, w : &mut Window) -> Result<WindowHandle, WindowError> {
+        w.rebuild(self)
     }
 
 }

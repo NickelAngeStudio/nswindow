@@ -43,6 +43,22 @@ pub(crate) enum LinuxWindow {
 
 impl LinuxWindow {
 
+    #[inline(always)]
+    pub(crate) fn rebuild(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
+
+    /// Get position and size of a [Window](crate::Window) from a [WindowHandle]. 
+    /// Usually used to query parent size and position.
+    #[inline(always)]
+    pub(crate) fn get_window_pos_size(&mut self, handle : WindowHandle) -> (WindowPosition, WindowSize) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_parent(&mut self, parent : Option<WindowHandle>) -> Result<bool, WindowError> {
+        todo!()
+    }
     
     #[inline(always)]
     pub fn set_title(&mut self, title : &str) -> Result<bool, WindowError>{
@@ -55,48 +71,44 @@ impl LinuxWindow {
     }
 
     #[inline(always)]
-    pub fn set_size_min(&mut self, size : WindowSize) -> Result<bool, WindowError> {
-        todo!()
-    }
-
-    #[inline(always)]
-    pub fn set_size_max(&mut self, size : WindowSize) -> Result<bool, WindowError> {
-        todo!()
-    }
-
-    #[inline(always)]
     pub fn set_icon(&mut self, icon : Option<&mut dyn std::io::Read>) {
         todo!()
     }
 
     #[inline(always)]
-    pub fn set_taskbar(&self, show : bool) {
+    pub fn set_taskbar(&mut self, show : bool) {
         todo!()
     }
 
     #[inline(always)]
-    pub fn restore(&mut self) -> Result<bool, WindowError> {
+    pub fn restore(&mut self) {
         todo!()
     }
 
     #[inline(always)]
-    pub fn show(&mut self) -> Result<bool, WindowError> {
+    pub fn show(&mut self) {
         todo!()
     }
 
     #[inline(always)]
-    pub fn hide(&mut self) -> Result<bool, WindowError> {
+    pub fn hide(&mut self) {
         todo!()
     }
 
     #[inline(always)]
-    pub fn set_position(&mut self, position : WindowRelativePosition) -> Result<WindowPosition, WindowError> {
+    pub fn close(&mut self) {
         todo!()
     }
 
 
     #[inline(always)]
-    pub fn set_fullscreen(&mut self, fsmode : WindowFullScreenMode) -> &mut Self {
+    pub fn set_position(&mut self, position : WindowPosition) {
+        todo!()
+    }
+
+
+    #[inline(always)]
+    pub fn set_fullscreen(&mut self, fsmode : WindowFullScreenMode)  {
         todo!()
     }
 
@@ -109,6 +121,8 @@ impl LinuxWindow {
     pub fn maximize(&mut self) {
         todo!()
     }
+
+
 
     
 }

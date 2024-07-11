@@ -43,7 +43,7 @@ pub struct DisplayResolution {
 
 /// Display physical size in millimeters.
 #[derive(Debug, PartialEq, Clone)]
-pub struct DisplaySize {
+pub struct DisplaySizeMM {
     /// Width in millimeters of the display.
     pub width : usize,
 
@@ -114,11 +114,14 @@ impl Displays {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Display {
 
+    /// Handle of that display
+    pub handle : DisplayHandle,
+
     /// Identifier of that display
     pub identifier : String,
 
     /// Physical size of display in millimeters
-    pub size : DisplaySize,
+    pub size : DisplaySizeMM,
 
     /// Current position of that display on extended desktop
     pub position : DisplayDesktopPosition,
@@ -185,8 +188,8 @@ impl DisplaySupportedResolution {
 
 /// display unit tests
 #[cfg(test)]
-mod tests{
-    use super::{Desktop, Display, DisplayDesktopPosition, DisplayResolution, DisplaySize, DisplaySupportedResolution, Displays, DisplayRefreshRate };
+ pub(crate)  mod tests{
+    use super::{Desktop, Display, DisplayDesktopPosition, DisplayResolution, DisplaySizeMM, DisplaySupportedResolution, Displays, DisplayRefreshRate };
 
     fn create_empty_displays() -> Displays {
         let list : Vec<Display> = Vec::new();
@@ -194,7 +197,7 @@ mod tests{
     }
 
     /// Create [Displays] from an actual known source for tests.
-    fn create_displays(primary_first : bool) -> Displays {
+    pub(crate) fn create_displays(primary_first : bool) -> Displays {
 
         let mut list : Vec<Display> = Vec::new();
 
@@ -239,8 +242,8 @@ mod tests{
         capacities.push(create_supported(320,240, vec![6005]));  
         capacities.push(create_supported(360,202, vec![5951,5913]));  
         capacities.push(create_supported(320,180, vec![5984,5932]));  
-        list.push(Display { identifier: "eDP-1".to_owned(), 
-                            size: DisplaySize { width: 344, height: 194 }, 
+        list.push(Display { handle : 0, identifier: "eDP-1".to_owned(), 
+                            size: DisplaySizeMM { width: 344, height: 194 }, 
                             position: DisplayDesktopPosition { x: 0, y: 1080 }, 
                             resolution: DisplayResolution { width: 1920, height: 1080 }, 
                             refresh_rate: 6003, 
@@ -297,8 +300,8 @@ mod tests{
         capacities.push(create_supported(320,240, vec![7281,7500,6005]));  
         capacities.push(create_supported(360,202, vec![5951,5913]));  
         capacities.push(create_supported(320,180, vec![5984,5932]));   
-        list.push(Display { identifier: "HDMI-1".to_owned(), 
-                            size: DisplaySize { width: 510, height: 290 }, 
+        list.push(Display { handle : 1, identifier: "HDMI-1".to_owned(), 
+                            size: DisplaySizeMM { width: 510, height: 290 }, 
                             position: DisplayDesktopPosition { x: 0, y: 0 }, 
                             resolution: DisplayResolution { width: 1920, height: 1080 }, 
                             refresh_rate: 12000, 
@@ -394,7 +397,7 @@ mod tests{
         displays.list.iter().for_each( |display|
             match display.identifier.as_str() {
                 "eDP-1" => {
-                    assert_eq!(display.size, DisplaySize { width: 344, height: 194 });
+                    assert_eq!(display.size, DisplaySizeMM { width: 344, height: 194 });
                     assert_eq!(display.position, DisplayDesktopPosition { x: 0, y: 1080 });
                     assert_eq!(display.resolution, DisplayResolution { width: 1920, height: 1080 });
                     assert_eq!(display.refresh_rate, 6003);
@@ -402,7 +405,7 @@ mod tests{
                     assert_eq!(display.supported.len(), 39);
                 },
                 "HDMI-1" => {
-                    assert_eq!(display.size, DisplaySize { width: 510, height: 290 });
+                    assert_eq!(display.size, DisplaySizeMM { width: 510, height: 290 });
                     assert_eq!(display.position, DisplayDesktopPosition { x: 0, y: 0 });
                     assert_eq!(display.resolution, DisplayResolution { width: 1920, height: 1080 });
                     assert_eq!(display.refresh_rate, 12000);

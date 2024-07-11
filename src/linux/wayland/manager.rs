@@ -36,7 +36,7 @@ impl WaylandWindowManager {
     }
 
     #[inline(always)]
-    pub fn event(&self) -> Option<WindowManagerEvent> {
+    pub fn event(&self) -> Option<&WindowManagerEvent> {
         todo!()
     }
 

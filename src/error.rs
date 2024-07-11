@@ -70,6 +70,10 @@ pub enum WindowError {
     DisplayInformationError,
 
 
+    /// Happens when using an invalid display handle
+    DisplayInvalidHandle
+
+
 
 
 }
