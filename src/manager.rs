@@ -31,6 +31,11 @@ use crate::{display::Displays, WindowError, Window, WindowBuilder, WindowHandle,
 /// [WindowManager] is used to create and manipulate [Window].
 /// 
 /// It is also used to fetch [WindowManagerEvent], get [Desktop] and [Displays] informations.
+/// 
+/// # Example
+/// ```
+/// 
+/// ```
 pub struct WindowManager {
     /// Linux [WindowManager] abstraction for calls.
     #[cfg(target_os = "linux")]
@@ -39,7 +44,12 @@ pub struct WindowManager {
 
 impl WindowManager {
 
-    /// Create a new window manager used to create [Window], fetch [WindowManagerEvent], get [Desktop] and [Displays] informations.
+    /// Create a new instance of window manager.
+    /// 
+    /// Returns Ok(WindowManager) on success.
+    /// 
+    /// # Errors
+    /// Returns Err([`WindowError::NoWindowManager`]) if no suitable window manager available on system.
     pub fn new() -> Result<WindowManager, crate::WindowError> {
 
         match_cfg! {
@@ -91,16 +101,27 @@ impl WindowManager {
         todo!()
     }
 
+    /// Rebuild a [Window] from a [WindowHandle] and a [WindowBuilder].
+    pub(crate) fn rebuild(&mut self, handle : WindowHandle, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        todo!()
+    }
+
+
     /// Poll an event from the window manager.
     /// 
     /// Returns Some(WindowManagerEvent) if any, [Option::None] if no event.
-    /// 
-    /// # Note
-    /// If the feature `nswindow_application` is enabled, [Option::None] will never
-    /// be returned and the request will lock until an event occurred.
     #[inline(always)]
-    pub fn event(&self) -> Option<WindowManagerEvent> {
+    pub fn event(&self) -> Option<&WindowManagerEvent> {
         self.wm.event()
+    }
+
+    /// Wait an event from the window manager.
+    /// 
+    /// This will block code execution until a [WindowManagerEvent] occur.
+    /// Mostly used for [Retained Mode](https://en.wikipedia.org/wiki/Retained_mode) GUI application.
+    #[inline(always)]
+    pub fn event_wait(&self) -> &WindowManagerEvent {
+        self.wm.event_wait()
     }
 
     /// Returns an immutable reference to [Window] if [WindowHandle] is valid, 

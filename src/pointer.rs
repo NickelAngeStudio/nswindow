@@ -26,6 +26,8 @@ SOFTWARE.
 
 use nscfg::match_cfg;
 
+use crate::WindowError;
+
 /// Default [WindowPointer] mode.
 const WP_DEFAULT_MODE : WindowPointerMode = WindowPointerMode::Cursor;
 
@@ -37,6 +39,12 @@ const WP_DEFAULT_CONFINED : bool = false;
 
 /// Default [WindowPointer] cursor.
 const WP_DEFAULT_CURSOR : WindowCursor = WindowCursor::Normal;
+
+/// The position of the [Window](crate::Window) pointer as pair of x,y
+pub struct WindowPointerPosition {
+    pub x : u32,
+    pub y : u32
+}
 
 
 /// [Window](super::window::Window) pointer properties such as mode, position, etc.
@@ -212,6 +220,41 @@ impl WindowPointer {
         }
     }
 
+    /// Returns the [WindowPointer] position on the window.
+    /// 
+    /// Returns [None] if pointer out of [Window](crate::Window) bounds. 
+    pub fn position(&self) -> Option<WindowPointerPosition> {
+
+        match_cfg! {
+            linux => {
+                match &self.pointer {
+                    Some(lp) => lp.position(),
+                    None => None,
+                }
+            },
+            _ => {},
+        }
+
+    }
+
+    /// Set the [WindowPointer] position within the [Window](crate::Window).
+    /// 
+    /// Returns Ok(true) if cursor was moved, Ok(false) if the cursor didn't move or 
+    /// ['WindowError::WindowpointerOOB'] when trying to set the position while cursor is out of bounds.
+    pub fn set_position(&mut self, position : WindowPointerPosition) -> Result<bool, WindowError> {
+
+        match_cfg! {
+            linux => {
+                match self.pointer {
+                    Some(ref mut lp) => lp.set_position(position),
+                    None => Ok(false),
+                }
+            },
+            _ => {},
+        }
+
+    }
+
 
 
 
@@ -313,6 +356,7 @@ mod tests{
         assert!(wp.visible == WP_DEFAULT_VISIBILITY);
         assert!(wp.confined == WP_DEFAULT_CONFINED);
         assert!(wp.cursor == WP_DEFAULT_CURSOR);
+        assert!(wp.position().is_none());
 
     }
 

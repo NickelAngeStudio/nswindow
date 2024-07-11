@@ -64,6 +64,7 @@ pub enum WindowFrameButtonMode {
 /// 
 /// # Note
 /// On linux, [WindowFrame] properties might not all works depending on the linux flavour used.
+#[derive(Debug, PartialEq)]
 pub struct WindowFrame {
 
     /// Linux [WindowFrame] abstraction for calls. Is set as [Option] since [WindowBuilder] can use it.
@@ -71,21 +72,22 @@ pub struct WindowFrame {
     frame : Option<crate::linux::frame::LinuxWindowFrame>,
 
     /// Is window frame visible
-    visible : bool,
+    pub(crate)  visible : bool,
 
     /// Can the frame be used to resize window.
-    resizable : bool,
+    pub(crate)  resizable : bool,
 
     /// Mode of the min button 
-    min_button : WindowFrameButtonMode,
+    pub(crate)  min_button : WindowFrameButtonMode,
 
     /// Mode of the max button
-    max_button : WindowFrameButtonMode,
+    pub(crate)  max_button : WindowFrameButtonMode,
 
     /// Mode of the close button
-    close_button : WindowFrameButtonMode,
+    pub(crate)  close_button : WindowFrameButtonMode,
 
 }
+
 
 impl WindowFrame {
 

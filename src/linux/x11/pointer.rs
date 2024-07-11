@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::pointer::{WindowCursor, WindowPointerMode};
+use crate::{pointer::{WindowCursor, WindowPointerMode, WindowPointerPosition}, WindowError};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) struct X11Pointer {
@@ -58,6 +58,16 @@ impl X11Pointer {
 
     #[inline(always)]
     pub fn set_cursor(&mut self, cursor : WindowCursor) {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn position(&self) -> Option<WindowPointerPosition> {
+        todo!()
+    }
+
+    #[inline(always)]
+    pub fn set_position(&mut self, position : WindowPointerPosition) -> Result<bool, WindowError> {
         todo!()
     }
 

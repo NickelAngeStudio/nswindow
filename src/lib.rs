@@ -68,11 +68,11 @@ pub mod builder;
 pub use builder::WindowBuilder as WindowBuilder;
 pub use manager::WindowManager as WindowManager;
 pub use window::Window as Window;
+pub use window::WindowHandle as WindowHandle;
 pub use window::WindowFullScreenMode as WindowFullScreenMode;
 pub use window::WindowPosition as WindowPosition;
 pub use window::WindowRelativePosition as WindowRelativePosition;
 pub use window::WindowSize as WindowSize;
 pub use error::WindowError as WindowError;
 
-/// Window handle used by the [WindowManager].
-pub type WindowHandle = *const usize;
+

@@ -43,11 +43,16 @@ pub(crate) enum LinuxWindowManager {
 impl LinuxWindowManager {
 
     #[inline(always)]
-    pub(crate) fn event(&self) -> Option<WindowManagerEvent> {
+    pub(crate) fn event(&self) -> Option<&WindowManagerEvent> {
         match self {
             LinuxWindowManager::X11(wm) => wm.event(),
             LinuxWindowManager::Wayland(wm) => wm.event(),
         }
+    }
+
+    #[inline(always)]
+    pub(crate) fn event_wait(&self) -> &WindowManagerEvent {
+        todo!()
     }
 
     #[inline(always)]

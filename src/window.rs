@@ -24,22 +24,42 @@ SOFTWARE.
 
 
 
-use crate::{ display::{Display, DisplayHandle}, linux::pointer, WindowBuilder, WindowError, WindowHandle};
+use std::rc::Rc;
 
- 
+use crate::{ display::{self, Desktop, Display, DisplayDesktopPosition, DisplayHandle, DisplayResolution, Displays}, frame::WindowFrame, keyboard::WindowKeyboard, linux::pointer, pointer::WindowPointer, WindowBuilder, WindowError};
+
+/// Window handle used by the [WindowManager](crate::WindowManager).
+/// 
+/// It is the same handle used by the operating system.
+pub type WindowHandle = *const usize;
 
 /// [Window](crate::Window) size as width and height.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
 pub struct WindowSize {
     pub width : u32,
     pub height : u32,
 }
 
+impl WindowSize {
+    /// Create a new [WindowSize] from width and height.
+    pub fn new(width : u32, height : u32) -> WindowSize {
+        WindowSize { width, height }
+    }
+}
+
+
 /// [Window](crate::Window) position according to x and y axis.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct WindowPosition {
     pub x : i32,
     pub y : i32,
+}
+
+impl WindowPosition {
+    /// Create a new [WindowPosition] from x and y.
+    pub fn new(x : i32, y : i32) -> WindowPosition {
+        WindowPosition { x, y }
+    }
 }
 
 
@@ -48,6 +68,9 @@ pub struct WindowPosition {
 pub enum WindowRelativePosition {
     /// Position window on desktop from an absolute pair of x,y coordinates.
     Desktop(WindowPosition),
+
+    /// Position window on the center of desktop.
+    DesktopCenter,
 
     /// Position window on a specific display from an absolute pair of x,y coordinates.
     Display(DisplayHandle, WindowPosition),
@@ -61,11 +84,11 @@ pub enum WindowRelativePosition {
     /// Position window in the center of parent window. All [Window] have parent, up to the root which is the desktop.
     ParentCenter,
 
-    /// Position window on the center of primary display.
-    PrimaryCenter,
-
     /// Position window on the primary display with [WindowPosition].
     Primary(WindowPosition),
+
+    /// Position window on the center of primary display.
+    PrimaryCenter,
 }
 
 /// Possible [Window](crate::Window) fullscreen modes.
@@ -88,139 +111,845 @@ pub enum WindowFullScreenMode {
 
 /// [Window] is used to manipulate an individual window.
 /// 
-/// It is possible to get the operatin system window manager handle via [Window::get_os_handle].
 /// TODO: Develop more
 pub struct Window {
     /// Linux [Window] abstraction for calls.
     #[cfg(target_os = "linux")]
-    window : crate::linux::window::LinuxWindow,  
+    pub(crate) window : crate::linux::window::LinuxWindow,
+
+    /// Reference counter to displays
+    pub(crate) displays : Rc<Displays>,  
+
+    /// Handle of the [Window]
+    pub(crate) handle : WindowHandle,
 
     /// Parent [WindowHandle]
-    parent : Option<WindowHandle>,
+    pub(crate) parent : Option<WindowHandle>,
 
+    /// [Window] frame properties.
+    pub(crate) frame : WindowFrame,
+
+    /// [Window] keyboard properties.
+    pub(crate) keyboard : WindowKeyboard,
+
+    /// [Window] pointer properties.
+    pub(crate) pointer : WindowPointer,
+
+    /// Title of the [Window]
+    pub(crate) title : String,
+
+    /// Size of the [Window].
+    pub(crate) size : WindowSize,
+
+    /// Minimum size of the [Window].
+    pub(crate) min_size : WindowSize,
+
+    /// Maximum size of the [Window].
+    pub(crate) max_size : WindowSize,
+
+    /// Position of the [Window] on the desktop.
+    pub(crate) position : WindowPosition,
+
+    /// Is Window Fullscreen
+    pub(crate) fullscreen : bool,
+
+    /// Is Window minimized
+    pub(crate) minimized : bool,
+
+    /// Is Window maximized
+    pub(crate) maximized : bool,
+
+    /// Window is currently visible.
+    pub(crate) visible : bool,
+
+    /// Show the window in the taskbar.
+    pub(crate) taskbar : bool,
 }
 
 
 impl Window {
 
-
+    /// Function invoked by the builder when rebuilding a [Window].
     pub(crate) fn rebuild(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
-        todo!()
+        self.window.rebuild(builder)
     }
 
-    /// Get [WindowHandle].
+    /// Returns the [WindowHandle] of the [Window].
     pub fn handle(&self) -> WindowHandle {
-        todo!()
+        self.handle
     }
 
-    /// Get [Window] title.
+    /// Returns the parent [WindowHandle] if any.
+    pub fn parent(&self) -> Option<WindowHandle> {
+        self.parent
+    }
+
+    /// Set a [Window] parent.
+    /// 
+    /// Returns Ok(true) if the parent changed, false otherwise.
+    /// 
+    /// # Errors
+    /// Returns [`WindowError::InvalidWindowHandle`] if parent [WindowHandle] doesn't refer to any [Window].
+    /// Returns [`WindowError::WindowParentSelf`] if [WindowHandle] if the same as the [Window] itself.
+    /// Returns [`WindowError::WindowParentLoop`] if a parent loop would occur.
+    pub fn set_parent(&mut self, parent : Option<WindowHandle>) -> Result<bool, WindowError> {
+
+        match parent {
+            Some(new_parent) => {
+                match self.parent {
+                    Some(old_parent) => {
+                        if new_parent == old_parent {
+                            Ok(false)
+                        } else  if new_parent == self.handle {
+                            Err(WindowError::WindowParentSelf)
+                        } else {
+                            self.parent = Some(new_parent);
+                            self.window.set_parent(parent)
+                        }
+                    }
+                    None => {
+                        if new_parent == self.handle {
+                            Err(WindowError::WindowParentSelf)
+                        } else {
+                            self.parent = Some(new_parent);
+                            self.window.set_parent(parent)
+                        }
+                    },
+                }
+            },
+            None => {
+                if self.parent.is_some() {
+                    self.parent = None;
+                    self.window.set_parent(parent)
+                } else {
+                    Ok(false)
+                }
+            },
+        }
+    }
+
+    /// Returns the [Window] title.
     pub fn title(&self) -> &str {
-        todo!()
+        &self.title
     }
 
     /// Set the [Window] title.
     pub fn set_title(&mut self, title : &str) -> Result<bool, WindowError>{
-        todo!()
+        self.title = title.to_string();
+        self.window.set_title(title)
     }
 
     /// Get [WindowSize] of [Window].
     pub fn size(&self) -> WindowSize {
-        todo!()
+        self.size
     }
 
     /// Set [WindowSize] of [Window].
+    /// 
+    /// # Errors
+    /// Returns Err(['WindowError::WindowSizeOOB']) if size is not between min and max.
     pub fn set_size(&mut self, size : WindowSize) -> Result<bool, WindowError> {
-        todo!()
+        
+        if self.size > self.max_size || self.size < self.min_size {
+            Err(WindowError::WindowSizeOOB)
+        } else {
+            self.size = size;
+            self.window.set_size(size)
+        }
+    }
+
+    /// Get the minimum [WindowSize] of [Window].
+    pub fn size_min(&self) -> WindowSize {
+        self.min_size
+    }
+
+    /// Set the minimum [WindowSize] of [Window].
+    /// 
+    /// Returns Ok(true) if changed, Ok(false) otherwise.
+    /// 
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::WindowMinSizeBiggerThanMax`] if min `size` is bigger than `max` size.
+    pub fn set_size_min(&mut self, size : WindowSize) -> Result<bool, WindowError> {
+        
+        if size > self.max_size {
+            Err(WindowError::WindowMinSizeBiggerThanMax)
+        } else {
+            if self.min_size != size {
+                self.min_size = size;
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+    }
+
+    /// Get the maximum [WindowSize] of [Window].
+    pub fn size_max(&self) -> WindowSize {
+        self.max_size
+    }
+
+    /// Set the maximum [WindowSize] of [Window].
+    /// 
+    /// Returns Ok(true) if changed, Ok(false) otherwise.
+    /// 
+    /// # Errors
+    /// [WindowBuilder::build] returns [`WindowError::WindowMinSizeBiggerThanMax`] if min `size` is bigger than `max` size.
+    pub fn set_size_max(&mut self, size : WindowSize) -> Result<bool, WindowError> {
+        
+        if size < self.min_size {
+            Err(WindowError::WindowMinSizeBiggerThanMax)
+        } else {
+            if self.max_size != size {
+                self.max_size = size;
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+
     }
 
      /// Set the [Window] icon from a [std::io::Read] source.
-     pub fn set_icon(&mut self, icon : Option<&dyn std::io::Read>) {
-        todo!()
+     /// 
+     /// Set the `icon` parameter to [None] to display default icon.
+     pub fn set_icon(&mut self, icon : Option<&mut dyn std::io::Read>) {
+        self.window.set_icon(icon)
     }
 
-    /// Returns true if [Window] if visible (show() was called)wm
-    pub fn visible(&mut self) -> Result<bool, WindowError> {
-        todo!()
+    /// Returns true if the [Window] is showed in the taskbar.
+    pub fn taskbar(&self) -> bool {
+        self.taskbar
+    }
+
+    /// Set if the [Window] is showed in the taskbar.
+    pub fn set_taskbar(&mut self, show : bool) {
+        if self.taskbar != show {
+            self.taskbar = show;
+            self.window.set_taskbar(show)
+        }
+    }
+
+    /// Returns true if [Window] is visible.
+    pub fn visible(&self) -> bool {
+        self.visible
+    }
+
+    /// Restore the [Window], removing minimize, maximize and/or fullscreen modes.
+    pub fn restore(&mut self) {
+        
+        if self.fullscreen || self.minimized || self.maximized {
+            self.fullscreen = false;
+            self.minimized = false;
+            self.maximized = false;
+            self.window.restore();
+        }
+
     }
 
     /// Show the [Window] on display.
-    pub fn show(&mut self) -> Result<bool, WindowError> {
-        todo!()
+    pub fn show(&mut self) {
+        if !self.visible {
+            self.window.show();
+        }
     }
 
     /// Hide the [Window] on display.
-    pub fn hide(&mut self) -> Result<bool, WindowError> {
-        todo!()
+    pub fn hide(&mut self) {
+        if self.visible {
+            self.window.hide();
+        }
     }
 
-    /// Close [Window], removing it from display and clearing the ressources.
-    pub fn close(&mut self) -> Result<bool, WindowError> {
-        todo!()
+    /// Close the [Window], removing it from display and clearing the ressources.
+    /// 
+    /// [WindowHandle] will be invalid if invoked again.
+    pub fn close(&mut self) {
+        self.window.close();
     }
+
 
     /// [WindowPosition] of the [Window] on the desktop.
     pub fn position(&mut self) -> WindowPosition {
-        todo!()
+        self.position
     }
 
-    /// Set the position of the [Window] with a [WindowRelativePosition].
+    /// Set the position of the [Window] with a [WindowRelativePosition] and checking for desktop out of bounds.
     /// 
-    /// Returns Ok([WindowPosition]) with the position on the desktop or [WindowError::WindowRelativePositionOOB] if position is invalid.
+    /// Returns Ok([WindowPosition]) with the position on the desktop.
+    /// 
+    /// # Errors
+    /// Returns Err([`WindowError::WindowRelativePositionOOB`]) if position would get out of desktop bound.
+    /// Returns Err([`WindowError::DisplayInvalidHandle`]) if an invalid display handle was given.
     pub fn set_position(&mut self, position : WindowRelativePosition) -> Result<WindowPosition, WindowError> {
-        todo!()
+        self.set_window_position(position, true)
+    }
+    
+    // Set the position of the [Window] with a [WindowRelativePosition] without checking for desktop out of bounds.
+    /// 
+    /// Returns Ok([WindowPosition]) with the position on the desktop.
+    /// 
+    /// # Errors
+    /// Returns Err([`WindowError::DisplayInvalidHandle`]) if an invalid display handle was given.
+    pub fn set_position_unchecked(&mut self, position : WindowRelativePosition) -> Result<WindowPosition, WindowError> {
+        self.set_window_position(position, true)
     }
 
 
-    // TODO: Determine window position handling
-    // Get relative position of window
-    //fn position() -> ;
-
-    // Set relative position of window
-    //fn set position() -> ;
-
-    // Get absolute position of window
-    //fn position_absolute()
-
-    // Set absolute position of window
-    //fn set_position_absolute;
-
-    /// Returns true if [Window] has decoration.
-    pub fn decoration(&self) -> bool {
-        todo!()
+    /// Returns immutable reference to the [WindowFrame].
+    pub fn frame(&self) -> &WindowFrame {
+        &self.frame
     }
 
-    /*
-    pointer
+    /// Returns mutable reference to the [WindowFrame].
+    pub fn frame_mut(&mut self) -> &mut WindowFrame {
+        &mut self.frame
+    }
 
-    pointer_mut
+    /// Returns immutable reference to the [WindowKeyboard].
+    pub fn keyboard(&self) -> &WindowKeyboard {
+        &self.keyboard
+    }
 
-    keyboard
+    /// Returns mutable reference to the [WindowKeyboard].
+    pub fn keyboard_mut(&mut self) -> &mut WindowKeyboard {
+        &mut self.keyboard
+    }
 
-    keyboard_mut
+    /// Returns immutable reference to the [WindowPointer].
+    pub fn pointer(&self) -> &WindowPointer {
+        &self.pointer
+    }
 
-    show_decoration
+    /// Returns mutable reference to the [WindowPointer].
+    pub fn pointer_mut(&mut self) -> &mut WindowPointer {
+        &mut self.pointer
+    }
 
-    hide_decoration
+    /// Returns true if the [Window] is currently in fullscreen mode.
+    pub fn fullscreen(&self) -> bool {
+        self.fullscreen
+    }
 
-    minimize
+    /// Set the [Window] fullscreen mode. Use [Window::restore()] to exit fullscreen mode.
+    pub fn set_fullscreen(&mut self, fsmode : WindowFullScreenMode) {
+        
+        if !self.fullscreen {
+            self.window.set_fullscreen(fsmode);
+            self.fullscreen = true;
+        }
 
-    maximize
+    }
 
-    set_fullscreen
+    /// Returns true if [Window] is currently minimized.
+    pub fn minimized(&self) -> bool {
+        self.minimized
+    }
 
-    */
-    // Show window decoration
-    // TODO:Rest of functions
-/*
-    WindowPropertySet::Position(option) => self.set_position(option),
-    WindowPropertySet::ShowDecoration => self.(),
-    WindowPropertySet::HideDecoration => self.(),
-    WindowPropertySet::Minimize => self.(),
-    WindowPropertySet::Maximized => self.(),
-    WindowPropertySet::Fullscreen(fsmode) => self.(fsmode.clone()),
-    WindowPropertySet::Restore => self.restore(),
-    WindowPropertySet::Keyboard(kb_property) => self.set_keyboard_property(kb_property),
-    WindowPropertySet::Pointer(p_property) => self.set_pointer_property(p_property),
-*/
+    /// Minimize the [Window] in the taskbar.
+    pub fn minimize(&mut self)  {
+        
+        if !self.minimized {
+            self.window.minimize();
+            self.minimized = true;
+        }
+
+    }
+    
+    /// Returns true if [Window] is currently maximized.
+    pub fn maximized(&mut self) -> bool {
+        self.maximized
+    }
+
+    /// Maximize the [Window] in it's current display.
+    pub fn maximize(&mut self) {
+        
+        if !self.maximized {
+            self.window.maximize();
+            self.maximized = true;
+        }
+
+    }
+
+    /// Set the window desktop position with or without out of bound checks.
+    fn set_window_position(&mut self, position : WindowRelativePosition, check_oob : bool) -> Result<WindowPosition, WindowError> {
+
+        match match &position {
+            WindowRelativePosition::Parent(_) | WindowRelativePosition::ParentCenter => {
+                match self.parent {
+                    Some(parent) => Self::get_window_desktop_position(self.size, self.displays.clone(), 
+                        position, Some(self.window.get_window_pos_size(parent)), check_oob),
+                    None => {
+                        match &self.displays.desktop {
+                            Some(desktop) => Self::get_window_desktop_position(self.size, self.displays.clone(), 
+                                position, Some((WindowPosition { x: 0, y: 0 }, WindowSize { width: desktop.current.width as u32, height: desktop.current.height as u32 })), check_oob),
+                            None => Self::get_window_desktop_position(self.size, self.displays.clone(), 
+                                position, Some((WindowPosition { x: 0, y: 0 }, WindowSize{ width: 0, height: 0 })), check_oob),
+                        }
+                        
+                    },
+                }
+                
+            },
+            _ => Self::get_window_desktop_position(self.size, self.displays.clone(), position, None, check_oob)
+        } {
+            Ok(position) => {
+                self.window.set_position(position);
+                Ok(position)
+            },
+            Err(err) => Err(err),
+        }
+
+    }
+
+
+    /// Get the window desktop position according to [WindowRelativePosition].
+    /// `pps` means Parent position size.
+    /// 
+    /// Returns Err([WindowError::WindowRelativePositionOOB]) if any parts overflow from desktop.
+    /// Returns Err([WindowError::DisplayInvalidHandle]) if a display handle doesn't exists.
+    fn get_window_desktop_position(size : WindowSize, displays : Rc<Displays>, position : WindowRelativePosition, pps : Option<(WindowPosition, WindowSize)>, check_oob : bool) -> Result<WindowPosition, WindowError> {
+        let position : Result<WindowPosition, WindowError> = match position {
+            WindowRelativePosition::Desktop(position) => Ok(position),
+            WindowRelativePosition::DesktopCenter => {
+                match &displays.desktop {
+                    Some(desktop) => {
+                        let position = WindowPosition { x: ((desktop.current.width as i32 - size.width as i32) / 2) as i32, y: ((desktop.current.height as i32 - size.height as i32) / 2) as i32 };
+                        Ok(position)
+                    },
+                    // No desktop is put to 0,0
+                    None => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition { x: 0, y: 0 }), None, check_oob),
+                }
+            }
+            WindowRelativePosition::Display(handle, position) => if handle < displays.list.len() {
+                let display = &displays.list[handle];
+                Ok(WindowPosition { x: position.x + display.position.x, y: position.y + display.position.y })
+            } else {
+                Err(WindowError::DisplayInvalidHandle)
+            },
+            WindowRelativePosition::DisplayCenter(handle) => if handle < displays.list.len() {
+                let display = &displays.list[handle];
+                let position = WindowPosition { x: ((display.resolution.width as i32 - size.width as i32) / 2) as i32, y: ((display.resolution.height as i32 - size.height as i32) / 2) as i32 };
+                Ok(WindowPosition { x: position.x + display.position.x, y: position.y + display.position.y })
+            } else {
+                Err(WindowError::DisplayInvalidHandle)
+            },
+            WindowRelativePosition::Parent(position) => match pps {
+                Some(pps) => {
+                    Ok(WindowPosition { x: position.x + pps.0.x, y: position.y + pps.0.y })
+                },
+                // No parent is returned to desktop
+                None => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(position), None, check_oob),
+            },
+            WindowRelativePosition::ParentCenter => match pps {
+                Some(pps) => {
+                    let position = WindowPosition { x: ((pps.1.width as i32 - size.width as i32) / 2) as i32, y: ((pps.1.height as i32 - size.height as i32) / 2) as i32 };
+                    Ok(WindowPosition { x: position.x + pps.0.x, y: position.y + pps.0.y })
+                },
+                // No parent is returned to desktop
+                None => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DesktopCenter, None, check_oob),
+            },
+            WindowRelativePosition::PrimaryCenter => {
+                match displays.primary() {
+                    Some(display) => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DisplayCenter(display.handle), None, check_oob),
+                    // If no primary display, revert to desktop center
+                    None => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DesktopCenter, None, check_oob),
+                }
+            },
+            WindowRelativePosition::Primary(position) => {
+                match displays.primary() {
+                    Some(display) => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(display.handle, position), None, check_oob),
+                    // If no primary display, revert to desktop
+                    None => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(position), None, check_oob),
+                }
+            },
+        };
+
+        if !check_oob {  // If test for out of bound not enabled
+            position
+        } else {
+            match position {
+                Ok(position) => {
+                    // Test for OOB
+                    let desktop : Desktop = match &displays.desktop {
+                        Some(desktop) => desktop.clone(),
+                        None => Desktop { min: DisplayResolution { width: 0, height: 0 }, max: DisplayResolution { width: 0, height: 0 }, current: DisplayResolution { width: 0, height: 0 } },
+                    };
+                    if position.x < 0 || position.x + size.width as i32 > desktop.current.width as i32 || position.y < 0 || position.y + size.height as i32 > desktop.current.height as i32 {
+                        Err(WindowError::WindowRelativePositionOOB)
+                    } else {
+                        Ok(position)
+                    }
+                },
+                Err(err) => Err(err),
+            }
+        }
+
+        
+
+        
+    }
+
+}
+
+
+
+
+/*************
+* UNIT TESTS * 
+*************/
+
+/// display unit tests
+#[cfg(test)]
+mod tests{
+    use std::rc::Rc;
+
+    use crate::{display::{tests::create_displays, Displays}, Window, WindowError, WindowPosition, WindowRelativePosition, WindowSize};
+
+
+    fn assert_position(position : &WindowPosition, expected_x : i32, expected_y : i32) {
+        assert!(position.x == expected_x && position.y == expected_y, "Expected ({},{}), got ({},{})", expected_x, expected_y, position.x, position.y);
+    }
+
+    /// Unit tests get_window_desktop_position
+    ///
+    /// # Verification(s)
+    /// V1 | WindowRelativePosition::Desktop
+    /// V2 | WindowRelativePosition::DesktopCenter
+    /// V3 | WindowRelativePosition::Display
+    /// V4 | WindowRelativePosition::DisplayCenter
+    /// V5 | WindowRelativePosition::Parent
+    /// V6 | WindowRelativePosition::ParentCenter
+    /// V7 | WindowRelativePosition::Primary
+    /// V8 | WindowRelativePosition::PrimaryCenter
+    #[test]
+    fn ut_get_window_desktop_position() {
+        let displays : Rc<Displays> = Rc::new(create_displays(true));
+        let size = WindowSize { width: 800, height: 600 };
+        let pps : Option<(WindowPosition, WindowSize)> = Some((WindowPosition { x: 400, y: 150 }, WindowSize { width: 1024, height: 768 }));
+       
+        // V1 | WindowRelativePosition::Desktop
+        let position = WindowRelativePosition::Desktop(WindowPosition { x: 50, y: 125 });
+        match Window::get_window_desktop_position(size, displays.clone(), position, None, true) {
+            Ok(position) => assert_position(&position, 50, 125),
+            Err(_) => assert!(false),
+        }
+
+        // V2 | WindowRelativePosition::DesktopCenter
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DesktopCenter, None, true) {
+            Ok(position) => assert_position(&position, 560, 780),
+            Err(_) => assert!(false),
+        }
+
+        // V3 | WindowRelativePosition::Display
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(0, WindowPosition::new(100, 200)), None, true) {
+            Ok(position) => assert!(position.x == 100 && position.y == 1280, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(1, WindowPosition::new(100, 200)), None, true) {
+            Ok(position) => assert!(position.x == 100 && position.y == 200, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(2, WindowPosition::new(100, 200)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::DisplayInvalidHandle)"),
+            Err(err) => assert!(err == WindowError::DisplayInvalidHandle),
+        }
+
+        // V4 | WindowRelativePosition::DisplayCenter
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DisplayCenter(0), None, true) {
+            Ok(position) => assert!(position.x == 560 && position.y == 1320, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DisplayCenter(1), None, true) {
+            Ok(position) => assert!(position.x == 560 && position.y == 240, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DisplayCenter(2), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::DisplayInvalidHandle)"),
+            Err(err) => assert!(err == WindowError::DisplayInvalidHandle),
+        }
+
+        // V5 | WindowRelativePosition::Parent
+        // Without parent fallback to desktop
+        let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
+        match Window::get_window_desktop_position(size, displays.clone(), position, None, true) {
+            Ok(position) => assert_position(&position, 50, 125),
+            Err(_) => assert!(false),
+        }
+
+        // With parent
+        let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
+        match Window::get_window_desktop_position(size, displays.clone(), position, pps, true) {
+            Ok(position) => assert_position(&position, 450, 275),
+            Err(_) => assert!(false),
+        }
+
+        // V6 | WindowRelativePosition::ParentCenter
+
+        // Without parent fallback to desktop
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, None, true) {
+            Ok(position) => assert_position(&position, 560, 780),
+            Err(_) => assert!(false),
+        }
+        
+        // With parent
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, pps, true) {
+            Ok(position) => assert_position(&position, 512, 234),
+            Err(_) => assert!(false),
+        }
+
+        // V7 | WindowRelativePosition::Primary
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Primary(WindowPosition::new(255, 311)), None, true) {
+            Ok(position) => assert!(position.x == 255 && position.y == 1391, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+
+        // V8 | WindowRelativePosition::PrimaryCenter
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::PrimaryCenter, None, true) {
+            Ok(position) => assert!(position.x == 560 && position.y == 1320, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+
+    }
+
+    /// Unit tests get_window_desktop_position OOB
+    ///
+    /// # Verification(s)
+    /// V1 | WindowError::WindowRelativePositionOOB for each type with position.
+    /// V2 | WindowError::WindowRelativePositionOOB unchecked for each type with position.
+    #[test]
+    fn ut_get_window_desktop_position_oob() {
+        let displays : Rc<Displays> = Rc::new(create_displays(true));
+        let size = WindowSize { width: 800, height: 600 };
+        let pps : Option<(WindowPosition, WindowSize)> = Some((WindowPosition { x: 400, y: 150 }, WindowSize { width: 1024, height: 768 }));
+
+        // V1 | WindowError::WindowRelativePositionOOB for each type with position.
+        // Desktop
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(i32::MIN / 2, 0)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(i32::MAX / 2, 0)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(0, i32::MIN / 2)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(0, i32::MAX / 2)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+
+        // Display
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(0, WindowPosition::new(i32::MIN / 2, 0)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(1, WindowPosition::new(i32::MAX / 2, 0)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(0, WindowPosition::new(0, i32::MIN / 2)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(1, WindowPosition::new(0, i32::MAX / 2)), None, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+
+        // Parent
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MIN / 2, 0)), pps, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MAX / 2, 0)), pps, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MIN / 2)), pps, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MAX / 2)), pps, true) {
+            Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+    
+        // V2 | WindowError::WindowRelativePositionOOB unchecked for each type with position.
+        // Desktop
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(i32::MIN / 2, 0)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(i32::MAX / 2, 0)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(0, i32::MIN / 2)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(WindowPosition::new(0, i32::MAX / 2)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+
+        // Display
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(0, WindowPosition::new(i32::MIN / 2, 0)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(1, WindowPosition::new(i32::MAX / 2, 0)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(0, WindowPosition::new(0, i32::MIN / 2)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(1, WindowPosition::new(0, i32::MAX / 2)), None, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+
+        // Parent
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MIN / 2, 0)), pps, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MAX / 2, 0)), pps, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MIN / 2)), pps, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MAX / 2)), pps, false) {
+            Ok(_) => assert!(true),
+            Err(err) => assert!(false, "Should not be OOB"),
+        }
+
+    }
+
+    /// Unit tests get_window_desktop_position limit
+    ///
+    /// # Verification(s)
+    /// V1 | Test each type with no displays or desktop
+    #[test]
+    fn ut_get_window_desktop_position_limit() {
+        let displays : Rc<Displays> = Rc::new(Displays { list: Vec::new(), desktop: None });
+        let size = WindowSize { width: 800, height: 600 };
+        let pps : Option<(WindowPosition, WindowSize)> = Some((WindowPosition { x: 400, y: 150 }, WindowSize { width: 1024, height: 768 }));
+
+        // WindowRelativePosition::Desktop
+        let position = WindowRelativePosition::Desktop(WindowPosition { x: 50, y: 125 });
+        match Window::get_window_desktop_position(size, displays.clone(), position, None, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+        // unchecked
+        let position = WindowRelativePosition::Desktop(WindowPosition { x: 50, y: 125 });
+        match Window::get_window_desktop_position(size, displays.clone(), position, None, false) {
+            Ok(position) => assert_position(&position, 50, 125),
+            Err(_) => assert!(false),
+        }
+
+        // WindowRelativePosition::DesktopCenter
+        // checked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DesktopCenter, None, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+
+        // unchecked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DesktopCenter, None, false) {
+            Ok(position) => assert_position(&position, 0, 0),
+            Err(_) => assert!(false),
+        }
+
+        // WindowRelativePosition::Display
+        // Checked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(0, WindowPosition::new(100, 200)), None, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::DisplayInvalidHandle),
+        }
+
+        // UnChecked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Display(0, WindowPosition::new(100, 200)), None, false) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::DisplayInvalidHandle),
+        }
+
+        // WindowRelativePosition::DisplayCenter
+        // Checked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DisplayCenter(0), None, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::DisplayInvalidHandle),
+        }
+
+        // UnChecked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::DisplayCenter(0), None, false) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::DisplayInvalidHandle),
+        }
+
+        // WindowRelativePosition::Parent
+
+        // Checked
+        let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
+        match Window::get_window_desktop_position(size, displays.clone(), position, pps, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+
+        // UnChecked
+        let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
+        match Window::get_window_desktop_position(size, displays.clone(), position, pps, false) {
+            Ok(position) => assert_position(&position, 450, 275),
+            Err(_) => assert!(false),
+        }
+
+        // WindowRelativePosition::ParentCenter
+        // Checked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, pps, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+
+        // UnChecked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, pps, false) {
+            Ok(position) => assert_position(&position, 512, 234),
+            Err(_) => assert!(false),
+        }
+
+        // WindowRelativePosition::Primary
+        // Checked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Primary(WindowPosition::new(255, 311)), None, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+
+        // UnChecked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Primary(WindowPosition::new(255, 311)), None, false) {
+            Ok(position) => assert!(position.x == 255 && position.y == 311, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+
+        // WindowRelativePosition::PrimaryCenter
+        // Checked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::PrimaryCenter, None, true) {
+            Ok(_) => assert!(false),
+            Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+        }
+
+        // Unchecked
+        match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::PrimaryCenter, None, false) {
+            Ok(position) => assert!(position.x == 0 && position.y == 0, " Result={:?}", position),
+            Err(_) => assert!(false),
+        }
+    }
 
 }

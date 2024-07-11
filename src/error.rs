@@ -59,12 +59,19 @@ pub enum WindowError {
     /// Trying to set Window1 as parent of Window2 while Window2 parent of Window1.
     WindowParentLoop,
 
+    /// Happens when trying to set the [WindowPointer](crate::pointer::WindowPointer) when it is out of window bounds.
+    WindowpointerOOB,
+
     // ***********
     // * DISPLAY *
     // ***********
 
     /// Happens when display information cannot be fetched.
     DisplayInformationError,
+
+
+    /// Happens when using an invalid display handle
+    DisplayInvalidHandle
 
 
 

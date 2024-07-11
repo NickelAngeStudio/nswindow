@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-use crate::{Window, WindowError, WindowFullScreenMode, WindowHandle, keyboard::WindowKeyboard, WindowManager, pointer::WindowPointer, WindowRelativePosition, WindowSize};
+use crate::{frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, Window, WindowError, WindowFullScreenMode, WindowHandle, WindowManager, WindowRelativePosition, WindowSize};
 
 /// Default title of [Window].
 const WB_DEFAULT_TITLE : &str = "New window";
@@ -45,9 +45,6 @@ const WB_DEFAULT_PARENT : Option<WindowHandle> = None;
 /// Default fullscreen mode of [Window].
 const WB_DEFAULT_FSMODE : Option<WindowFullScreenMode> = None;
 
-/// Default decoration toggle of [Window].
-const WB_DEFAULT_DECORATION : bool = true;
-
 /// Default minimized toggle of [Window].
 const WB_DEFAULT_MINIMIZED : bool = false;
 
@@ -57,9 +54,16 @@ const WB_DEFAULT_MAXIMIZED : bool = false;
 /// Default visibility toggle of [Window].
 const WB_DEFAULT_VISIBLE : bool = true;
 
+/// Default visibility toggle of [Window] taskbar.
+const WB_DEFAULT_TASKBAR : bool = true;
+
+
 
 /// [WindowBuilder] used to create new [Window] or recreate an actual one.
 pub struct WindowBuilder {
+
+    /// Buffer of the icon of [Window].
+    icon : Option<Vec<u8>>,
 
     /// Title of the [Window]
     title : String,
@@ -79,6 +83,9 @@ pub struct WindowBuilder {
     /// Parent of the [Window].
     parent : Option<WindowHandle>,
 
+    /// Frame properties for [Window].
+    frame : WindowFrame,
+
     /// Keyboard properties for [Window].
     keyboard : WindowKeyboard,
 
@@ -87,9 +94,6 @@ pub struct WindowBuilder {
 
     /// Fullscreen mode
     fsmode : Option<WindowFullScreenMode>,
-
-    /// Show desktop frame around [Window].
-    decoration : bool,
 
     /// Window minimized
     minimized : bool,
@@ -100,6 +104,8 @@ pub struct WindowBuilder {
     /// Window will be showed on desktop when created.
     visible : bool,
 
+    /// Window will be showed in the taskbar
+    taskbar : bool,
 }
 
 impl WindowBuilder {
@@ -107,6 +113,7 @@ impl WindowBuilder {
     /// Create a new [WindowBuilder] instance with default parameters. See 
     pub fn new() -> WindowBuilder {
         WindowBuilder { 
+            icon : None,
             title: WB_DEFAULT_TITLE.to_string(), 
             min_size : WB_DEFAULT_MIN_SIZE,
             max_size : WB_DEFAULT_MAX_SIZE,
@@ -115,11 +122,12 @@ impl WindowBuilder {
             parent: WB_DEFAULT_PARENT, 
             keyboard: WindowKeyboard::new(), 
             pointer: WindowPointer::new(), 
-            decoration: WB_DEFAULT_DECORATION,
+            frame: WindowFrame::new(),
             fsmode: WB_DEFAULT_FSMODE,
             minimized: WB_DEFAULT_MINIMIZED,
             maximized: WB_DEFAULT_MAXIMIZED, 
             visible : WB_DEFAULT_VISIBLE,
+            taskbar : WB_DEFAULT_TASKBAR,
         }
     }
 
@@ -178,6 +186,29 @@ impl WindowBuilder {
         self
     }
 
+    /// Override the default [WindowFrame].
+    pub fn frame(&mut self, frame : WindowFrame)-> &mut Self {
+        self.frame = frame;
+        self
+    }
+
+     /// Set the [Window] icon from a [std::io::Read] source.
+    /// 
+    /// Set the `icon` parameter to [None] to display default [Window] icon.
+    pub fn icon(&mut self, icon : Option<&mut dyn std::io::Read>)  -> &mut Self {
+        
+        match icon {
+            Some(icon) => {
+                let mut buf : Vec<u8> = Vec::new();
+                let _ = icon.read_to_end(&mut buf);
+                self.icon = Some(buf);
+            },
+            None => self.icon = None,
+        }
+        self
+    }
+
+
     /// [WindowHandle] of the parent of the new [Window].
     /// 
     /// # Errors
@@ -196,13 +227,13 @@ impl WindowBuilder {
     }
 
     /// [Window] will be showed as minimized.
-    pub fn minimized(&mut self) -> &mut Self {
+    pub fn minimize(&mut self) -> &mut Self {
         self.minimized = true;
         self
     }
 
     /// [Window] will be showed as maximized.
-    pub fn maximized(&mut self) -> &mut Self {
+    pub fn maximize(&mut self) -> &mut Self {
         self.maximized = true;
         self
     }
@@ -215,14 +246,15 @@ impl WindowBuilder {
         self
     }
 
-    /// Remove [Window] decoration on creation (Title bar, min and max buttons, etc...).
-    pub fn no_decoration(&mut self) -> &mut Self {
-        self.decoration = false;
+    /// Toggle showing the [Window] is the taskbar or not.
+    pub fn taskbar(&mut self, show : bool) -> &mut Self {
+        self.taskbar = show;
         self
     }
 
     /// Reset the [WindowBuilder] with default values. 
     pub fn reset(&mut self) -> &mut Self {
+        self.icon = None;
         self.title = WB_DEFAULT_TITLE.to_string();
         self.min_size = WB_DEFAULT_MIN_SIZE;
         self.max_size = WB_DEFAULT_MAX_SIZE;
@@ -231,11 +263,12 @@ impl WindowBuilder {
         self.parent = WB_DEFAULT_PARENT;
         self.keyboard = WindowKeyboard::new(); 
         self.pointer = WindowPointer::new();
-        self.decoration = WB_DEFAULT_DECORATION;
+        self.frame = WindowFrame::new();
         self.fsmode = WB_DEFAULT_FSMODE;
         self.minimized = WB_DEFAULT_MINIMIZED;
         self.maximized = WB_DEFAULT_MAXIMIZED;
         self.visible = WB_DEFAULT_VISIBLE;
+        self.taskbar = WB_DEFAULT_TASKBAR;
         self
     }
 
@@ -258,13 +291,38 @@ impl WindowBuilder {
 *************/
 #[cfg(test)]
 mod tests{
-    use crate::{builder::{WB_DEFAULT_DECORATION, WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MAX_SIZE, WB_DEFAULT_MINIMIZED, WB_DEFAULT_MIN_SIZE, WB_DEFAULT_PARENT, WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, keyboard::{WindowKeyboard, WindowKeyboardMode}, pointer::{WindowCursor, WindowPointer, WindowPointerMode}, WindowBuilder, WindowFullScreenMode, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
+    use std::io::{Read, Write};
+
+    use crate::{builder::{WB_DEFAULT_FSMODE, WB_DEFAULT_MAXIMIZED, WB_DEFAULT_MAX_SIZE, WB_DEFAULT_MINIMIZED, WB_DEFAULT_MIN_SIZE, WB_DEFAULT_PARENT, WB_DEFAULT_POSITION, WB_DEFAULT_SIZE, WB_DEFAULT_TASKBAR, WB_DEFAULT_TITLE, WB_DEFAULT_VISIBLE}, frame::{WindowFrame, WindowFrameButtonMode}, keyboard::{WindowKeyboard, WindowKeyboardMode}, pointer::{WindowCursor, WindowPointer, WindowPointerMode}, WindowBuilder, WindowFullScreenMode, WindowHandle, WindowPosition, WindowRelativePosition, WindowSize};
+
+    struct Icon {
+        index : usize,
+        content : [u8;10],
+    }
+
+    impl Read for Icon {
+        fn read(&mut self, mut buf: &mut [u8]) -> std::io::Result<usize> {
+
+            let written : usize = if buf.len() > self.content.len() - self.index {
+                self.content.len() - self.index
+            } else {
+                buf.len()
+            };
+
+            buf[0..written].copy_from_slice(&self.content[self.index..self.index+written]);
+            self.index += written;
+
+            Ok(written)
+        }
+    }
 
     /// Test default values of WindowBuilder
     fn test_defaults(wb : &WindowBuilder) {
         let wkb = WindowKeyboard::new();
         let wp = WindowPointer::new();
+        let wf = WindowFrame::new();
 
+        assert!(wb.icon == None);
         assert!(wb.title == WB_DEFAULT_TITLE.to_string());
         assert!(wb.min_size == WB_DEFAULT_MIN_SIZE);
         assert!(wb.max_size == WB_DEFAULT_MAX_SIZE);
@@ -272,12 +330,13 @@ mod tests{
         assert!(wb.position == WB_DEFAULT_POSITION);
         assert!(wb.parent == WB_DEFAULT_PARENT);
         assert!(wb.fsmode == WB_DEFAULT_FSMODE);
-        assert!(wb.decoration == WB_DEFAULT_DECORATION);
         assert!(wb.minimized == WB_DEFAULT_MINIMIZED);
         assert!(wb.maximized == WB_DEFAULT_MAXIMIZED);
         assert!(wb.visible == WB_DEFAULT_VISIBLE);
+        assert!(wb.taskbar == WB_DEFAULT_TASKBAR);
         assert!(wb.keyboard == wkb);
         assert!(wb.pointer == wp);
+        assert!(wb.frame == wf);
 
     }
 
@@ -322,6 +381,8 @@ mod tests{
         const WP_VISIBLE : bool = false;
         const WP_CURSOR : WindowCursor = WindowCursor::Move;
 
+        let mut icon = Icon{ index:0, content: [0,1,2,3,4,5,6,7,8,9] };
+
         let mut wkb = WindowKeyboard::new();
         wkb.mode = WKB_MODE;
         wkb.auto_repeat = WKB_REPEAT;
@@ -332,21 +393,30 @@ mod tests{
         wp.visible = WP_VISIBLE;
         wp.cursor = WP_CURSOR;
 
+        let mut wf = WindowFrame::new();
+        wf.visible = false;
+        wf.resizable = false;
+        wf.min_button = WindowFrameButtonMode::Disable;
+        wf.max_button = WindowFrameButtonMode::Hidden;
+        wf.close_button = WindowFrameButtonMode::Overriden;
+
         // V1 | Allocate value to each parameter.
         let mut wb = WindowBuilder::new();
                 wb.title(TITLE)
+                .icon(Some(&mut icon))
                 .size_min(MIN_SIZE)
                 .size_max(MAX_SIZE)
                 .size(SIZE)
                 .position(POSITION)
                 .pointer(wp)
                 .keyboard(wkb)
+                .frame(wf)
                 .parent(PARENT)
                 .fullscreen(FSMODE)
-                .minimized()
-                .maximized()
+                .minimize()
+                .maximize()
                 .hide()
-                .no_decoration();
+                .taskbar(false);
 
         
         // V2 | Compare values VS Allocated values.
@@ -359,6 +429,18 @@ mod tests{
         wp.confined = WP_CONFINED;
         wp.visible = WP_VISIBLE;
         wp.cursor = WP_CURSOR;
+
+        let mut wf = WindowFrame::new();
+        wf.visible = false;
+        wf.resizable = false;
+        wf.min_button = WindowFrameButtonMode::Disable;
+        wf.max_button = WindowFrameButtonMode::Hidden;
+        wf.close_button = WindowFrameButtonMode::Overriden;
+        
+        assert!(wb.icon.is_some());
+        if let Some(icon) = &wb.icon {
+            assert!(icon.len() == 10);
+        }
         
         assert!(wb.title == TITLE.to_string());
         assert!(wb.min_size == MIN_SIZE);
@@ -367,12 +449,13 @@ mod tests{
         assert!(wb.position == POSITION);
         assert!(wb.parent == PARENT);
         assert!(wb.fsmode == FSMODE);
-        assert!(wb.decoration == false);
         assert!(wb.minimized == true);
         assert!(wb.maximized == true);
         assert!(wb.visible == false);
         assert!(wb.keyboard == wkb);
         assert!(wb.pointer == wp);
+        assert!(wb.frame == wf);
+        assert!(!wb.taskbar);
 
         // V3 | Reset and test default values.
         wb.reset();
