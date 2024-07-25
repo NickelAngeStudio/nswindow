@@ -25,7 +25,7 @@ SOFTWARE.
 
 //! Events polled by a [WindowManager](crate::WindowManager).
 
-use crate::WindowHandle;
+use crate::{WindowHandle, WindowPosition, WindowSize};
 
 /// [WindowEvent] with [WindowHandle] returned with [WindowManager::event()](crate::WindowManager::event()).
 pub struct WindowManagerEvent {
@@ -33,11 +33,22 @@ pub struct WindowManagerEvent {
     /// [WindowHandle] of [Window](crate::Window) which [Event] refer to.
     pub window : WindowHandle,
 
-
     /// [WindowEvent] that occurred.
     pub event : WindowEvent,
 
+    /// Timestamp of event
+    #[cfg(feature = "event_ts")]
+    pub timestamp : std::time::SystemTime,
+
 }
+
+/// [Window](crate::Window) coordinate where the [WindowEvent] occurred.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct WindowCoordinate {
+    pub x : i32,
+    pub y : i32,
+}
+
 
 /// Possible [WindowEvent] that can occur.
 pub enum WindowEvent {
@@ -59,16 +70,16 @@ pub enum WindowEvent {
 
     /// Happens when Window is exposed/damaged, meaning part of drawing is lost and need to be redraw.
     /// Provides position (x, y) and size (width, height) of region exposed. 
-    Exposed((i32, i32), (u32, u32)),
+    Exposed(WindowCoordinate, WindowSize),
 
     /// Happens when Window is moved. Provides (x,y) of new position.
-    Moved((i32, i32)),
+    Moved(WindowPosition),
 
     /// Happens when Window is moved and resized. Provides (x,y) of new position and (height, width) of new size.
-    MovedResized((i32, i32), (u32, u32)),
+    MovedResized(WindowPosition, WindowSize),
 
     /// Happens when Window is Resized. Provides (height, width) of new size.
-    Resized((u32, u32)),
+    Resized(WindowSize),
 
     /// Happens when Window is minimized.
     /// 
@@ -109,8 +120,8 @@ pub enum WindowEvent {
     /// Happens when a window was closed.
     Closed,
 
-    /// Happens when a sub window closed
-    SubWindowClosed,
+    /// Happens when a child window closed
+    ChildWindowClosed,
 
     /// Happens when a Modal subwindow showed
     ModalShowed,
@@ -120,31 +131,43 @@ pub enum WindowEvent {
 
 }
 
+/// Keyboard keycode
+pub type KeyCode = u32;
+
 /// Possible [WindowKeyboardEvent] that can occur.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum WindowKeyboardEvent {
     // Keyboard key down event of direct input mode. Provides keycode as u32.
-    KeyDown(u32),
+    KeyDown(KeyCode),
 
     // Keyboard key down event of direct input mode. Provides keycode as u32.
-    KeyUp(u32),
+    KeyUp(KeyCode),
 
     // KeyPress happens provides [Key] struct
     //KeyPress(Key),
 }
 
+/// Pointer button
+pub type PointerButton = u32;
+
+/// Pointer Acceleration as pair of x,y axis.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct PointerAcceleration {
+    pub x : i32,
+    pub y : i32,
+}
 
 /// Possible [WindowPointerEvent] that can occur.
 pub enum WindowPointerEvent {
     /// Pointer move event. Provides new (x, y) position. Only when in pointer mode.
-    Move((i32, i32)),
+    Move(WindowCoordinate),
 
     /// Pointer acceleration event.  Provides delta (x, y). Only when in acceleration mode.
-    Acceleration((i32, i32)),
+    Acceleration(PointerAcceleration),
 
     /// Pointer button down event. Provides button number and cursor position (x,y).
-    ButtonDown(u32, (i32, i32)),
+    ButtonDown(PointerButton, WindowCoordinate),
 
     /// Pointer button up event. Provides button number and cursor position (x,y).
-    ButtonUp(u32, (i32, i32)),
+    ButtonUp(PointerButton, WindowCoordinate),
 }

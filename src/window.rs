@@ -63,6 +63,7 @@ impl WindowPosition {
 }
 
 
+
 /// Possible [Window](crate::Window) relative positions.
 #[derive(Debug, PartialEq, Clone)]
 pub enum WindowRelativePosition {
@@ -79,9 +80,13 @@ pub enum WindowRelativePosition {
     DisplayCenter(DisplayHandle),
 
     /// Position window relative to parent window. All [Window] have parent, up to the root which is the desktop.
+    #[cfg(any(doc, not(feature = "nswindow_single_optimized")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "nswindow_single_optimized"))))]
     Parent(WindowPosition),
 
     /// Position window in the center of parent window. All [Window] have parent, up to the root which is the desktop.
+    #[cfg(any(doc, not(feature = "nswindow_single_optimized")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "nswindow_single_optimized"))))]
     ParentCenter,
 
     /// Position window on the primary display with [WindowPosition].
@@ -112,6 +117,7 @@ pub enum WindowFullScreenMode {
 /// [Window] is used to manipulate an individual window.
 /// 
 /// TODO: Develop more
+#[derive(Debug)]
 pub struct Window {
     /// Linux [Window] abstraction for calls.
     #[cfg(target_os = "linux")]
@@ -125,6 +131,12 @@ pub struct Window {
 
     /// Parent [WindowHandle]
     pub(crate) parent : Option<WindowHandle>,
+
+    /// Child [WindowHandle] array.
+    pub(crate) childs : Vec<WindowHandle>,
+
+    /// Modal [WindowHandle] blocking this [Window].
+    pub(crate) modal : Option<WindowHandle>,
 
     /// [Window] frame properties.
     pub(crate) frame : WindowFrame,
@@ -148,7 +160,7 @@ pub struct Window {
     pub(crate) max_size : WindowSize,
 
     /// Position of the [Window] on the desktop.
-    pub(crate) position : WindowPosition,
+    pub(crate) desktop_position : WindowPosition,
 
     /// Is Window Fullscreen
     pub(crate) fullscreen : bool,
@@ -179,6 +191,11 @@ impl Window {
         self.handle
     }
 
+    /// Returns immutable array of [Window] childs.
+    pub fn childs(&self) -> &Vec<WindowHandle> {
+        &self.childs
+    }
+
     /// Returns the parent [WindowHandle] if any.
     pub fn parent(&self) -> Option<WindowHandle> {
         self.parent
@@ -189,9 +206,9 @@ impl Window {
     /// Returns Ok(true) if the parent changed, false otherwise.
     /// 
     /// # Errors
-    /// Returns [`WindowError::InvalidWindowHandle`] if parent [WindowHandle] doesn't refer to any [Window].
-    /// Returns [`WindowError::WindowParentSelf`] if [WindowHandle] if the same as the [Window] itself.
-    /// Returns [`WindowError::WindowParentLoop`] if a parent loop would occur.
+    /// - Returns [`WindowError::InvalidWindowHandle`] if parent [WindowHandle] doesn't refer to any [Window].
+    /// - Returns [`WindowError::WindowParentSelf`] if [WindowHandle] if the same as the [Window] itself.
+    /// - Returns [`WindowError::WindowParentLoop`] if a parent loop would occur.
     pub fn set_parent(&mut self, parent : Option<WindowHandle>) -> Result<bool, WindowError> {
 
         match parent {
@@ -370,7 +387,7 @@ impl Window {
 
     /// [WindowPosition] of the [Window] on the desktop.
     pub fn position(&mut self) -> WindowPosition {
-        self.position
+        self.desktop_position
     }
 
     /// Set the position of the [Window] with a [WindowRelativePosition] and checking for desktop out of bounds.

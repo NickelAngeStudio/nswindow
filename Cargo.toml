@@ -24,8 +24,23 @@ exclude = [
 ]
 
 [features]
-# Only support 1 window. Remove all extra code and faster for games.
-nswindow_single_optimized = []
+# Only support 1 window. Remove all extra multiple window code and faster for games.
+single_opt = []
+
+# Add timestamp to events.
+event_ts = []
+
+# Enable the use of Cairo 2D graphics (https://www.cairographics.org/)
+cairo = []
+
+# Enable the use of Vulkan 3D graphics (https://www.vulkan.org/)
+vulkan = []
+
+# Enable the use of OpenGL graphics (https://www.opengl.org/)
+opengl = []
+
+# Enable the use of Microsoft Direct3D (https://en.wikipedia.org/wiki/Direct3D)
+direct3d = []
 
 [dependencies]
 nscfg = "1.0.0"
