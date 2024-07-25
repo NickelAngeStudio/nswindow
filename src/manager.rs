@@ -97,12 +97,20 @@ impl WindowManager {
 
 
     /// Build a [Window] from a [WindowBuilder].
+    #[inline(always)]
     pub(crate) fn build(&mut self, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
-        todo!()
-    }
 
-    /// Rebuild a [Window] from a [WindowHandle] and a [WindowBuilder].
-    pub(crate) fn rebuild(&mut self, handle : WindowHandle, builder : &WindowBuilder) -> Result<WindowHandle, WindowError> {
+        // WindowRelativePositionOOB
+
+        // WindowSizeOOB
+
+        // WindowMinSizeBiggerThanMax
+
+        // WindowParentSelf
+    
+        // WindowParentLoop
+
+
         todo!()
     }
 
@@ -111,7 +119,7 @@ impl WindowManager {
     /// 
     /// Returns Some(WindowManagerEvent) if any, [Option::None] if no event.
     #[inline(always)]
-    pub fn event(&self) -> Option<&WindowManagerEvent> {
+    pub fn event(&mut self) -> Option<&WindowManagerEvent> {
         self.wm.event()
     }
 
@@ -120,14 +128,14 @@ impl WindowManager {
     /// This will block code execution until a [WindowManagerEvent] occur.
     /// Mostly used for [Retained Mode](https://en.wikipedia.org/wiki/Retained_mode) GUI application.
     #[inline(always)]
-    pub fn event_wait(&self) -> &WindowManagerEvent {
+    pub fn event_wait(&mut self) -> &WindowManagerEvent {
         self.wm.event_wait()
     }
 
     /// Returns an immutable reference to [Window] if [WindowHandle] is valid, 
     /// err([NSWNDError::InvalidWindowHandle]) otherwise.
     #[inline(always)]
-    pub fn window(&mut self, window : WindowHandle) -> Result<&Window, WindowError> {
+    pub fn window(&self, window : WindowHandle) -> Result<&Window, WindowError> {
         self.wm.window(window)
     } 
     
@@ -145,5 +153,136 @@ impl WindowManager {
     }
 
     
+
+}
+
+
+/*************
+* UNIT TESTS * 
+*************/
+#[cfg(test)]
+mod tests{
+    use std::{i32, u32};
+
+    use crate::{ WindowBuilder, WindowError, WindowHandle, WindowManager};
+
+    /// WindowManager::build() unit test
+    #[test]
+    fn window_manager_ut_build() {
+        match WindowManager::new() {
+            Ok(mut wm) => {
+                match WindowBuilder::new().build(&mut wm){
+                    Ok(_) => { },
+                    Err(err) => panic!("{:?}", err),
+                }
+            },
+            Err(err) => assert!(false, "{:?}", err),
+        }
+    }
+
+    /// WindowManager::event() unit test
+    #[test]
+    fn window_manager_ut_event() {
+        match WindowManager::new() {
+            Ok(mut wm) => {
+                wm.event();
+            },
+            Err(err) => assert!(false, "{:?}", err),
+        }
+    }
+
+    /// WindowManager::window() and WindowManager::window_mut() unit test
+    #[test]
+    fn window_manager_ut_window() {
+        match WindowManager::new() {
+            Ok(mut wm) => {
+                match WindowBuilder::new().build(&mut wm){
+                    Ok(wh) => {
+                        match wm.window(wh){
+                            Ok(_) => {},
+                            Err(err) => panic!("{:?}", err),
+                        }
+                        
+                        match wm.window_mut(wh){
+                            Ok(_) => {},
+                            Err(err) => panic!("{:?}", err),
+                        }
+
+                     },
+                    Err(err) => panic!("{:?}", err),
+                }
+            },
+            Err(err) => assert!(false, "{:?}", err),
+        }
+    }
+
+    /// WindowManager::displays() unit test
+    #[test]
+    fn window_manager_ut_displays() {
+        match WindowManager::new() {
+            Ok(wm) => {
+                wm.displays();
+            },
+            Err(err) => assert!(false, "{:?}", err),
+        }
+    }
+
+    /// WindowManager::build() error unit tests
+    #[test]
+    fn window_manager_ut_build_error() {
+        match WindowManager::new() {
+            Ok(mut wm) => {
+                let invalid_handle : WindowHandle = &0;
+
+                // WindowRelativePositionOOB
+                match WindowBuilder::new().hide()
+                    .position(crate::WindowRelativePosition::Desktop(crate::WindowPosition { x: i32::MAX, y: i32::MAX }))
+                    .build(&mut wm) {
+                    Ok(_) => panic!("WindowRelativePositionOOB expected"),
+                    Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+                } 
+
+                // WindowSizeOOB
+                match WindowBuilder::new().hide()
+                    .size(crate::WindowSize { width: u32::MAX, height: u32::MAX })
+                    .build(&mut wm) {
+                    Ok(_) => panic!("WindowSizeOOB expected"),
+                    Err(err) => assert!(err == WindowError::WindowSizeOOB),
+                } 
+
+                // WindowMinSizeBiggerThanMax
+                match WindowBuilder::new().hide()
+                    .size_min(crate::WindowSize { width: u32::MAX, height: u32::MAX })
+                    .build(&mut wm) {
+                    Ok(_) => panic!("WindowMinSizeBiggerThanMax expected"),
+                    Err(err) => assert!(err == WindowError::WindowMinSizeBiggerThanMax),
+                } 
+
+                // InvalidWindowHandle for parent
+                match WindowBuilder::new().hide()
+                    .parent(Some(invalid_handle))
+                    .build(&mut wm) {
+                    Ok(_) => panic!("WindowMinSizeBiggerThanMax expected"),
+                    Err(err) => assert!(err == WindowError::WindowMinSizeBiggerThanMax),
+                }
+                
+            },
+            Err(err) => assert!(false, "{:?}", err),
+        }
+
+    }
+
+    /// WindowManager::window() and window_mut() error unit tests
+    #[test]
+    fn window_manager_ut_window_error() {
+        match WindowManager::new() {
+            Ok(mut wm) => {
+                let invalid_handle : WindowHandle = &0;
+                assert!(wm.window(invalid_handle).expect_err("InvalidWindowHandle expected!") == WindowError::InvalidWindowHandle);
+                assert!(wm.window_mut(invalid_handle).expect_err("InvalidWindowHandle expected!") == WindowError::InvalidWindowHandle);
+            },
+            Err(err) => assert!(false, "{:?}", err),
+        }
+    }
 
 }

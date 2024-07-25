@@ -22,7 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+use nswindow::WindowManager;
 
 
-// Tests features
-// event_ts
+
+/// Test WindowManager build further
+fn window_manager_build() {
+
+}

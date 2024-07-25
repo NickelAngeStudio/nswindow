@@ -52,6 +52,8 @@ pub mod manager;
 #[doc(hidden)] 
 pub mod window;
 
+
+
 pub mod frame;
 pub mod keyboard;
 pub mod pointer; 
@@ -62,7 +64,18 @@ pub mod event;
 #[doc(hidden)] 
 pub mod builder;
 
+target_cfg! {
+    !nswindow_single_optimized:ft => {
+        /// Window child behaviour
+        #[doc(hidden)] 
+        pub mod child;
 
+
+        // Re-import
+        pub use child::WindowChildAnchor as WindowChildAnchor;
+        pub use child::WindowChildBehaviour as WindowChildBehaviour;
+    }
+}
 
 // Re-import
 pub use builder::WindowBuilder as WindowBuilder;
