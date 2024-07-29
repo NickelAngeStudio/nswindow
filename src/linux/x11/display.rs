@@ -23,14 +23,13 @@ SOFTWARE.
 */
 
 
-use std::ptr::null_mut;
 
-use crate::{display::{self, Desktop, Display, DisplayDesktopPosition, DisplayHandle, DisplayRefreshRate, DisplayResolution, DisplaySizeMM, DisplaySupportedResolution, Displays}, error::WindowError};
+use crate::{display::{ Desktop, Display, DisplayDesktopPosition, DisplayHandle, DisplayRefreshRate, DisplayResolution, DisplaySizeMM, DisplaySupportedResolution, Displays}, error::WindowError};
 
 //use super::Display;
 
 /// Get x11 Displays from xrandr
-pub(crate) fn x11Displays() -> Result<Displays, WindowError> {
+pub(crate) fn x11_displays() -> Result<Displays, WindowError> {
 
     use std::process::Command;
 
@@ -141,7 +140,7 @@ fn fetch_supported(display : &mut Display, line : &str) {
     
     let mut cleaned = line.trim().replace("  ", " ").replace(".", "");
 
-    /// Remove all double spaces
+    // Remove all double spaces
     while cleaned.contains("  ") {
         cleaned = cleaned.replace("  ", " ");
     }
@@ -206,9 +205,7 @@ mod tests {
 
         // Only if x11 is supported
         if super::super::x11_supported() {
-            let displays = super::x11Displays();
-
-            println!("Display={:?}", displays);
+            let _ = super::x11_displays();
         }
 
     }

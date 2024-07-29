@@ -52,8 +52,6 @@ pub mod manager;
 #[doc(hidden)] 
 pub mod window;
 
-
-
 pub mod frame;
 pub mod keyboard;
 pub mod pointer; 
