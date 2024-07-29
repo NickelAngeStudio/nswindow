@@ -24,6 +24,13 @@ SOFTWARE.
 
 //! Pointer / Mouse and cursor properties of [Window](crate::Window). 
 
+/// Pointer unit tests
+#[cfg(test)]
+pub(crate) mod tests {
+    include!("tests/pointer.rs");
+}
+
+
 use nscfg::match_cfg;
 
 use crate::WindowError;
@@ -321,82 +328,4 @@ pub enum WindowPointerMode {
     /// 
     /// Usually used for 3d camera and direct mouse inputs.
     Acceleration,
-}
-
-
-
-
-/*************
-* UNIT TESTS * 
-*************/
-#[cfg(test)]
-mod tests{
-    use nscfg::match_cfg;
-
-    use crate::pointer::{WindowCursor, WindowPointer, WindowPointerMode, WP_DEFAULT_CONFINED, WP_DEFAULT_CURSOR, WP_DEFAULT_MODE, WP_DEFAULT_VISIBILITY};
-
-
-    /// Unit tests [super::WindowPointer] default values.
-    ///
-    /// # Verification(s)
-    /// V1 | Test each value on creation vs default values.
-    #[test]
-    fn ut_window_pointer_default() {
-        let wp: WindowPointer = WindowPointer::new();
-
-        // V1 | Test each value on creation vs default values.
-        match_cfg! {
-            linux => {
-                assert!(wp.pointer == None);
-            }, 
-            _ => {},
-        }
-
-        assert!(wp.mode == WP_DEFAULT_MODE);
-        assert!(wp.visible == WP_DEFAULT_VISIBILITY);
-        assert!(wp.confined == WP_DEFAULT_CONFINED);
-        assert!(wp.cursor == WP_DEFAULT_CURSOR);
-        assert!(wp.position().is_none());
-
-    }
-
-    /// Unit tests [super::WindowPointer] values modifications.
-    ///
-    /// # Verification(s)
-    /// V1 | Modifiy each value and compare.
-    #[test]
-    fn ut_window_pointer_update() {
-        let mut wp: WindowPointer = WindowPointer::new();
-
-        const MODE : WindowPointerMode = WindowPointerMode::Acceleration;
-        const CURSOR : WindowCursor = WindowCursor::Select;
-
-        // V1 | Modifiy each value and compare.
-
-        // Mode
-        assert!(wp.mode == WP_DEFAULT_MODE);
-        wp.set_mode(MODE);
-        assert!(wp.mode == MODE);
-
-        // Visibility
-        assert!(wp.visible());
-        wp.hide();
-        assert!(!wp.visible());
-        wp.show();
-        assert!(wp.visible());
-
-        // Confine and release
-        assert!(!wp.confined());
-        wp.confine();
-        assert!(wp.confined());
-        wp.release();
-        assert!(!wp.confined());
-        
-        // Cursor
-        assert!(wp.cursor == WP_DEFAULT_CURSOR);
-        wp.set_cursor(CURSOR);
-        assert!(wp.cursor == CURSOR);
-        
-    }
-
 }

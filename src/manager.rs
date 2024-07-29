@@ -27,6 +27,11 @@ use nscfg::{match_cfg, target_cfg};
 
 use crate::{display::Displays, WindowError, Window, WindowBuilder, WindowHandle, event::WindowManagerEvent};
 
+#[cfg(test)]
+mod tests{
+    // WindowManager unit tests
+    include!("tests/manager.rs");
+}
 
 /// [WindowManager] is used to create and manipulate [Window].
 /// 
@@ -153,136 +158,5 @@ impl WindowManager {
     }
 
     
-
-}
-
-
-/*************
-* UNIT TESTS * 
-*************/
-#[cfg(test)]
-mod tests{
-    use std::{i32, u32};
-
-    use crate::{ WindowBuilder, WindowError, WindowHandle, WindowManager};
-
-    /// WindowManager::build() unit test
-    #[test]
-    fn window_manager_ut_build() {
-        match WindowManager::new() {
-            Ok(mut wm) => {
-                match WindowBuilder::new().build(&mut wm){
-                    Ok(_) => { },
-                    Err(err) => panic!("{:?}", err),
-                }
-            },
-            Err(err) => assert!(false, "{:?}", err),
-        }
-    }
-
-    /// WindowManager::event() unit test
-    #[test]
-    fn window_manager_ut_event() {
-        match WindowManager::new() {
-            Ok(mut wm) => {
-                wm.event();
-            },
-            Err(err) => assert!(false, "{:?}", err),
-        }
-    }
-
-    /// WindowManager::window() and WindowManager::window_mut() unit test
-    #[test]
-    fn window_manager_ut_window() {
-        match WindowManager::new() {
-            Ok(mut wm) => {
-                match WindowBuilder::new().build(&mut wm){
-                    Ok(wh) => {
-                        match wm.window(wh){
-                            Ok(_) => {},
-                            Err(err) => panic!("{:?}", err),
-                        }
-                        
-                        match wm.window_mut(wh){
-                            Ok(_) => {},
-                            Err(err) => panic!("{:?}", err),
-                        }
-
-                     },
-                    Err(err) => panic!("{:?}", err),
-                }
-            },
-            Err(err) => assert!(false, "{:?}", err),
-        }
-    }
-
-    /// WindowManager::displays() unit test
-    #[test]
-    fn window_manager_ut_displays() {
-        match WindowManager::new() {
-            Ok(wm) => {
-                wm.displays();
-            },
-            Err(err) => assert!(false, "{:?}", err),
-        }
-    }
-
-    /// WindowManager::build() error unit tests
-    #[test]
-    fn window_manager_ut_build_error() {
-        match WindowManager::new() {
-            Ok(mut wm) => {
-                let invalid_handle : WindowHandle = &0;
-
-                // WindowRelativePositionOOB
-                match WindowBuilder::new().hide()
-                    .position(crate::WindowRelativePosition::Desktop(crate::WindowPosition { x: i32::MAX, y: i32::MAX }))
-                    .build(&mut wm) {
-                    Ok(_) => panic!("WindowRelativePositionOOB expected"),
-                    Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
-                } 
-
-                // WindowSizeOOB
-                match WindowBuilder::new().hide()
-                    .size(crate::WindowSize { width: u32::MAX, height: u32::MAX })
-                    .build(&mut wm) {
-                    Ok(_) => panic!("WindowSizeOOB expected"),
-                    Err(err) => assert!(err == WindowError::WindowSizeOOB),
-                } 
-
-                // WindowMinSizeBiggerThanMax
-                match WindowBuilder::new().hide()
-                    .size_min(crate::WindowSize { width: u32::MAX, height: u32::MAX })
-                    .build(&mut wm) {
-                    Ok(_) => panic!("WindowMinSizeBiggerThanMax expected"),
-                    Err(err) => assert!(err == WindowError::WindowMinSizeBiggerThanMax),
-                } 
-
-                // InvalidWindowHandle for parent
-                match WindowBuilder::new().hide()
-                    .parent(Some(invalid_handle))
-                    .build(&mut wm) {
-                    Ok(_) => panic!("WindowMinSizeBiggerThanMax expected"),
-                    Err(err) => assert!(err == WindowError::WindowMinSizeBiggerThanMax),
-                }
-                
-            },
-            Err(err) => assert!(false, "{:?}", err),
-        }
-
-    }
-
-    /// WindowManager::window() and window_mut() error unit tests
-    #[test]
-    fn window_manager_ut_window_error() {
-        match WindowManager::new() {
-            Ok(mut wm) => {
-                let invalid_handle : WindowHandle = &0;
-                assert!(wm.window(invalid_handle).expect_err("InvalidWindowHandle expected!") == WindowError::InvalidWindowHandle);
-                assert!(wm.window_mut(invalid_handle).expect_err("InvalidWindowHandle expected!") == WindowError::InvalidWindowHandle);
-            },
-            Err(err) => assert!(false, "{:?}", err),
-        }
-    }
 
 }

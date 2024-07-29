@@ -24,6 +24,13 @@ SOFTWARE.
 
 //! Keyboard properties of [Window](crate::Window).
 
+/// Keyboard unit tests
+#[cfg(test)]
+pub(crate) mod tests {
+    include!("tests/keyboard.rs");
+}
+
+
 use nscfg::match_cfg;
 
 /// Default [WindowKeyboardMode].
@@ -132,58 +139,4 @@ pub enum WindowKeyboardMode {
 
     /// Text mode is slower since it provides more information for text entry. Provides [EventKeyboard::KeyPress](super::event::keyboard::EventKeyboard).
     Text,
-}
-
-
-
-
-/*************
-* UNIT TESTS * 
-*************/
-#[cfg(test)]
-mod tests{
-    use crate::keyboard::{WindowKeyboard, WindowKeyboardMode, WKB_DEFAULT_MODE, WKB_DEFAULT_REPEAT};
-    
-
-    /// Unit tests [super::WindowKeyboard] default values.
-    ///
-    /// # Verification(s)
-    /// V1 | Test each value on creation vs default values.
-    #[test]
-    fn ut_window_keyboard_default() {
-        let wkb = WindowKeyboard::new();
-
-        // V1 | Test each value on creation vs default values.
-        assert!(wkb.keyboard == None);
-        assert!(wkb.mode == WKB_DEFAULT_MODE);
-        assert!(wkb.auto_repeat == WKB_DEFAULT_REPEAT);
-
-    }
-
-    /// Unit tests [super::WindowKeyboard] value update.
-    ///
-    /// # Verification(s)
-    /// V1 | Modify and test each value.
-    #[test]
-    fn ut_window_keyboard_update() {
-        let mut wkb = WindowKeyboard::new();
-
-        // V1 | Modify and test each value.
-        
-        // Mode
-        const MODE : WindowKeyboardMode = WindowKeyboardMode::Text;
-
-        assert!(wkb.mode == WKB_DEFAULT_MODE);
-        wkb.mode = MODE;
-        assert!(wkb.mode == MODE);
-
-        // Auto repeat
-        assert!(wkb.auto_repeat == WKB_DEFAULT_REPEAT);
-        wkb.enable_repeat();
-        assert!(wkb.auto_repeat == !WKB_DEFAULT_REPEAT);
-        wkb.disable_repeat();
-        assert!(wkb.auto_repeat == WKB_DEFAULT_REPEAT);
-
-    }
-
 }

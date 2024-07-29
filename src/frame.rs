@@ -24,6 +24,14 @@ SOFTWARE.
 
 //! Properties of the border surrounding a [Window](crate::Window)
 
+
+/// Frame unit tests
+#[cfg(test)]
+pub(crate) mod tests {
+    include!("tests/frame.rs");
+}
+
+
 use nscfg::match_cfg;
 
 /// [WindowFrame] default visibility.
@@ -315,98 +323,3 @@ impl WindowFrame {
 
     }
 }
-
-
-/*************
-* UNIT TESTS * 
-*************/
-#[cfg(test)]
-mod tests{
-    use crate::frame::{WindowFrameButtonMode, WF_DEFAULT_BUTTON, WF_DEFAULT_RESIZABLE};
-
-    use super::WindowFrame;
-
-    pub fn test_window_frame_default(wf : &WindowFrame) {
-
-        assert!(wf.frame == None);
-        assert!(wf.visible == WF_DEFAULT_RESIZABLE);
-        assert!(wf.resizable == WF_DEFAULT_RESIZABLE);
-        assert!(wf.min_button == WF_DEFAULT_BUTTON);
-        assert!(wf.max_button == WF_DEFAULT_BUTTON);
-        assert!(wf.close_button == WF_DEFAULT_BUTTON);
-
-        assert!(wf.visible() == WF_DEFAULT_RESIZABLE);
-        assert!(wf.resizable() == WF_DEFAULT_RESIZABLE);
-        assert!(wf.button_min() == WF_DEFAULT_BUTTON);
-        assert!(wf.button_max() == WF_DEFAULT_BUTTON);
-        assert!(wf.button_close() == WF_DEFAULT_BUTTON);
-
-    }
-
-
-    /// Unit tests [super::WindowFrame] default values.
-    ///
-    /// # Verification(s)
-    /// V1 | Test each value on creation vs default values.
-    #[test]
-    fn ut_window_frame_default() {
-        let wf = WindowFrame::new();
-        test_window_frame_default(&wf);
-    }
-
-    /// Unit tests [super::WindowFrame] values update.
-    ///
-    /// # Verification(s)
-    /// V1 | Modify each value and compare.
-    /// V2 | Reset and verify default values
-    #[test]
-    fn ut_window_frame_update() {
-        let mut wf = WindowFrame::new();
-
-
-        const BTNMIN : WindowFrameButtonMode = WindowFrameButtonMode::Disable;
-        const BTNMAX : WindowFrameButtonMode = WindowFrameButtonMode::Hidden;
-        const BTNCLOSE : WindowFrameButtonMode = WindowFrameButtonMode::Overriden;
-
-
-        // V1 | Modify each value and compare.
-
-        // Visibility
-        assert!(wf.visible);
-        wf.hide();
-        assert!(!wf.visible && !wf.visible());
-        wf.show();
-        assert!(wf.visible && wf.visible);
-
-        // Resizable
-        assert!(wf.resizable);
-        wf.lock();
-        assert!(!wf.resizable && !wf.resizable());
-        wf.unlock();
-        assert!(wf.resizable && wf.resizable());
-
-        // Button min
-        wf.set_button_min(BTNMIN);
-        assert!(wf.min_button == BTNMIN && wf.button_min() == BTNMIN);
-
-        // Button max
-        wf.set_button_max(BTNMAX);
-        assert!(wf.max_button == BTNMAX && wf.button_max() == BTNMAX);
-
-        // Button close
-        wf.set_button_close(BTNCLOSE);
-        assert!(wf.close_button == BTNCLOSE && wf.button_close() == BTNCLOSE);
-
-        // Make sure all buttons are different
-        assert!(wf.min_button != wf.max_button && wf.min_button != wf.close_button && wf.min_button != wf.close_button && wf.max_button != wf.close_button);
-
-        // V2 | Reset and verify default values
-        wf.reset();
-        test_window_frame_default(&wf);
-
-    }
-
-   
-
-}
-
