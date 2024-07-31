@@ -25,9 +25,6 @@ SOFTWARE.
 
 #[cfg(test)]
 mod tests{
-    // Window::get_window_desktop_position() unit tests
-    include!("tests/gwdp.rs");
-
     // Window unit tests
     include!("tests/window.rs");
 }
@@ -36,7 +33,9 @@ mod tests{
 
 use std::rc::Rc;
 
-use crate::{ display::{Desktop, DisplayHandle, DisplayResolution, Displays}, frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, WindowBuilder, WindowError};
+use nscfg::meta_cfg;
+
+use crate::{ display::{Desktop, DisplayHandle, DisplayResolution, Displays}, frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, sub::SubWindow, WindowBuilder, WindowError};
 
 /// Window handle used by the [WindowManager](crate::WindowManager).
 /// 
@@ -90,13 +89,13 @@ pub enum WindowRelativePosition {
     DisplayCenter(DisplayHandle),
 
     /// Position window relative to parent window. All [Window] have parent, up to the root which is the desktop.
-    #[cfg(any(doc, not(feature = "nswindow_single_optimized")))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "nswindow_single_optimized"))))]
+    #[cfg(any(doc, not(feature = "single_opt")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "single_opt"))))]
     Parent(WindowPosition),
 
     /// Position window in the center of parent window. All [Window] have parent, up to the root which is the desktop.
-    #[cfg(any(doc, not(feature = "nswindow_single_optimized")))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "nswindow_single_optimized"))))]
+    #[cfg(any(doc, not(feature = "single_opt")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "single_opt"))))]
     ParentCenter,
 
     /// Position window on the primary display with [WindowPosition].
@@ -140,13 +139,25 @@ pub struct Window {
     pub(crate) handle : WindowHandle,
 
     /// Parent [WindowHandle]
+    #[cfg(any(doc, not(feature = "single_opt")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "single_opt"))))]
     pub(crate) parent : Option<WindowHandle>,
 
+
     /// Child [WindowHandle] array.
+    #[cfg(any(doc, not(feature = "single_opt")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "single_opt"))))]
     pub(crate) childs : Vec<WindowHandle>,
 
     /// Modal [WindowHandle] blocking this [Window].
+    #[cfg(any(doc, not(feature = "single_opt")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "single_opt"))))]
     pub(crate) modal : Option<WindowHandle>,
+
+    /// [SubWindow] properties
+    #[cfg(any(doc, not(feature = "single_opt")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "single_opt"))))]
+    pub(crate) sub : Option<SubWindow>,
 
     /// [Window] frame properties.
     pub(crate) frame : WindowFrame,
@@ -202,15 +213,17 @@ impl Window {
     }
 
     /// Returns immutable array of [Window] childs.
+    #[meta_cfg(!single_opt:ft)]
     pub fn childs(&self) -> &Vec<WindowHandle> {
         &self.childs
     }
 
     /// Returns the parent [WindowHandle] if any.
+    #[meta_cfg(!single_opt:ft)]
     pub fn parent(&self) -> Option<WindowHandle> {
         self.parent
     }
-
+    
     /// Set a [Window] parent.
     /// 
     /// Returns Ok(true) if the parent changed, false otherwise.
@@ -219,6 +232,7 @@ impl Window {
     /// - Returns [`WindowError::InvalidWindowHandle`] if parent [WindowHandle] doesn't refer to any [Window].
     /// - Returns [`WindowError::WindowParentSelf`] if [WindowHandle] if the same as the [Window] itself.
     /// - Returns [`WindowError::WindowParentLoop`] if a parent loop would occur.
+    #[meta_cfg(!single_opt:ft)]
     pub fn set_parent(&mut self, parent : Option<WindowHandle>) -> Result<bool, WindowError> {
 
         match parent {

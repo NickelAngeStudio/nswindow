@@ -63,15 +63,9 @@ pub mod event;
 pub mod builder;
 
 target_cfg! {
-    !nswindow_single_optimized:ft => {
-        /// Window child behaviour
-        #[doc(hidden)] 
-        pub mod child;
-
-
-        // Re-import
-        pub use child::WindowChildAnchor as WindowChildAnchor;
-        pub use child::WindowChildBehaviour as WindowChildBehaviour;
+    !single_opt:ft => {
+        /// [SubWindow] properties
+        pub mod sub;
     }
 }
 

@@ -28,7 +28,9 @@ pub(crate) mod tests {
     include!("tests/builder.rs");
 }
 
-use crate::{frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, Window, WindowError, WindowFullScreenMode, WindowHandle, WindowManager, WindowRelativePosition, WindowSize};
+use nscfg::{match_cfg, meta_cfg};
+
+use crate::{frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, sub::SubWindow, Window, WindowError, WindowFullScreenMode, WindowHandle, WindowManager, WindowRelativePosition, WindowSize};
 
 /// Default title of [Window].
 const WB_DEFAULT_TITLE : &str = "New window";
@@ -92,6 +94,9 @@ pub struct WindowBuilder {
     /// Frame properties for [Window].
     frame : WindowFrame,
 
+    /// Subwindow properties for [Window].
+    sub : SubWindow,
+
     /// Keyboard properties for [Window].
     keyboard : WindowKeyboard,
 
@@ -126,6 +131,7 @@ impl WindowBuilder {
             size: WB_DEFAULT_SIZE, 
             position: WB_DEFAULT_POSITION, 
             parent: WB_DEFAULT_PARENT, 
+            sub : SubWindow::new(),
             keyboard: WindowKeyboard::new(), 
             pointer: WindowPointer::new(), 
             frame: WindowFrame::new(),
@@ -214,17 +220,24 @@ impl WindowBuilder {
         self
     }
 
-
     /// [WindowHandle] of the parent of the new [Window].
     /// 
     /// # Errors
     /// [WindowBuilder::build] returns [`WindowError::InvalidWindowHandle`] if [WindowHandle] doesn't refer to any [Window].
     /// [WindowBuilder::rebuild] returns [`WindowError::WindowParentSelf`] if [WindowHandle] if the same as the [Window] itself.
     /// [WindowBuilder::build] returns [`WindowError::WindowParentLoop`] if a parent loop would occur upon creation.
+    #[meta_cfg(!single_opt:ft)]
     pub fn parent(&mut self, parent : Option<WindowHandle>) -> &mut Self {
         self.parent = parent;
         self
     }
+
+    /// [SubWindow] properties of the new [Window].
+    #[meta_cfg(!single_opt:ft)]
+    pub fn subwindow(&mut self, sub : SubWindow) -> &mut Self {
+        self.sub = sub;
+        self
+    }   
    
     /// Set the [Window] fullscreen mode. This mode is applied when [Window] is showed.
     pub fn fullscreen(&mut self, fsmode : Option<WindowFullScreenMode>) -> &mut Self {
@@ -266,7 +279,14 @@ impl WindowBuilder {
         self.max_size = WB_DEFAULT_MAX_SIZE;
         self.size = WB_DEFAULT_SIZE;
         self.position = WB_DEFAULT_POSITION; 
-        self.parent = WB_DEFAULT_PARENT;
+
+        match_cfg! {
+            !single_opt:ft => {
+                self.parent = WB_DEFAULT_PARENT;
+                self.sub = SubWindow::new();
+            },
+            _ => {}
+        }
         self.keyboard = WindowKeyboard::new(); 
         self.pointer = WindowPointer::new();
         self.frame = WindowFrame::new();
