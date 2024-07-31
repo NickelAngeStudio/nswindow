@@ -52,6 +52,7 @@ fn test_defaults(wb : &WindowBuilder) {
     let wkb = WindowKeyboard::new();
     let wp = WindowPointer::new();
     let wf = WindowFrame::new();
+    let sub = crate::sub::SubWindow::new();
 
     assert!(wb.icon == None);
     assert!(wb.title == WB_DEFAULT_TITLE.to_string());
@@ -59,7 +60,15 @@ fn test_defaults(wb : &WindowBuilder) {
     assert!(wb.max_size == WB_DEFAULT_MAX_SIZE);
     assert!(wb.size == WB_DEFAULT_SIZE);
     assert!(wb.position == WB_DEFAULT_POSITION);
-    assert!(wb.parent == WB_DEFAULT_PARENT);
+
+    nscfg::match_cfg! {
+        !single_opt:ft => {
+            assert!(wb.sub == sub);
+            assert!(wb.parent == WB_DEFAULT_PARENT);
+        }, 
+        _ => {}
+    }
+    
     assert!(wb.fsmode == WB_DEFAULT_FSMODE);
     assert!(wb.minimized == WB_DEFAULT_MINIMIZED);
     assert!(wb.maximized == WB_DEFAULT_MAXIMIZED);
@@ -99,9 +108,6 @@ fn ut_window_builder_modifications() {
     const MAX_SIZE : WindowSize = WindowSize { width: 5555, height: 6666 };
     const SIZE : WindowSize = WindowSize { width: 123, height: 456 };
     const POSITION : WindowRelativePosition = WindowRelativePosition::Primary(WindowPosition { x: 987, y: 345 });
-
-    const PARENTHANDLE : usize = 1;
-    const PARENT : Option<WindowHandle> = Some(&PARENTHANDLE);
     const FSMODE : Option<WindowFullScreenMode> = Some(WindowFullScreenMode::Primary);
 
     const WKB_MODE : WindowKeyboardMode = WindowKeyboardMode::Text;
@@ -129,7 +135,7 @@ fn ut_window_builder_modifications() {
     wf.resizable = false;
     wf.min_button = WindowFrameButtonMode::Disable;
     wf.max_button = WindowFrameButtonMode::Hidden;
-    wf.close_button = WindowFrameButtonMode::Overriden;
+    wf.close_button = WindowFrameButtonMode::Overriden;    
 
     // V1 | Allocate value to each parameter.
     let mut wb = WindowBuilder::new();
@@ -142,7 +148,6 @@ fn ut_window_builder_modifications() {
             .pointer(wp)
             .keyboard(wkb)
             .frame(wf)
-            .parent(PARENT)
             .fullscreen(FSMODE)
             .minimize()
             .maximize()
@@ -178,7 +183,6 @@ fn ut_window_builder_modifications() {
     assert!(wb.max_size == MAX_SIZE);
     assert!(wb.size == SIZE);
     assert!(wb.position == POSITION);
-    assert!(wb.parent == PARENT);
     assert!(wb.fsmode == FSMODE);
     assert!(wb.minimized == true);
     assert!(wb.maximized == true);
@@ -187,6 +191,29 @@ fn ut_window_builder_modifications() {
     assert!(wb.pointer == wp);
     assert!(wb.frame == wf);
     assert!(!wb.taskbar);
+
+
+    nscfg::match_cfg! {
+        !single_opt:ft => {    // For parent and sub
+            const PARENTHANDLE : usize = 1;
+            const PARENT : Option<WindowHandle> = Some(&PARENTHANDLE);
+
+            let mut sub = crate::sub::SubWindow::new();
+            sub.block_parent_until_closed = true;
+            sub.minimize_with_parent = false;
+            sub.restore_with_parent = false;
+            sub.show_with_parent = true; 
+            sub.hide_with_parent = false;
+            sub.close_with_parent = false;
+
+            wb.parent(PARENT);
+            wb.subwindow(sub.clone());
+
+            assert!(wb.parent == PARENT);
+            assert!(wb.sub == sub);
+        },
+        _ => {}
+    }
 
     // V3 | Reset and test default values.
     wb.reset();
