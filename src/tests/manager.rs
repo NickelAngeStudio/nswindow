@@ -120,13 +120,19 @@ fn window_manager_ut_build_error() {
                 Err(err) => assert!(err == WindowError::WindowMinSizeBiggerThanMax),
             } 
 
-            // InvalidWindowHandle for parent
-            match WindowBuilder::new().hide()
-                .parent(Some(invalid_handle))
-                .build(&mut wm) {
-                Ok(_) => panic!("WindowMinSizeBiggerThanMax expected"),
-                Err(err) => assert!(err == WindowError::WindowMinSizeBiggerThanMax),
+            nscfg::match_cfg! {
+                !single_opt:ft => {
+                    // InvalidWindowHandle for parent
+                    match WindowBuilder::new().hide()
+                    .parent(Some(invalid_handle))
+                    .build(&mut wm) {
+                        Ok(_) => panic!("WindowMinSizeBiggerThanMax expected"),
+                        Err(err) => assert!(err == WindowError::WindowMinSizeBiggerThanMax),
+                        }
+                },
+                _ => {}
             }
+            
             
         },
         Err(err) => assert!(false, "{:?}", err),

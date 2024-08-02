@@ -30,7 +30,7 @@ pub(crate) mod tests {
 
 use nscfg::{match_cfg, meta_cfg};
 
-use crate::{frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, sub::SubWindow, Window, WindowError, WindowFullScreenMode, WindowHandle, WindowManager, WindowRelativePosition, WindowSize};
+use crate::{frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, Window, WindowError, WindowFullScreenMode, WindowHandle, WindowManager, WindowRelativePosition, WindowSize};
 
 /// Default title of [Window].
 const WB_DEFAULT_TITLE : &str = "New window";
@@ -89,13 +89,17 @@ pub struct WindowBuilder {
     position : WindowRelativePosition,
 
     /// Parent of the [Window].
+    #[cfg (any (doc , not (feature = "single_opt")))]
+    #[cfg_attr (docsrs , doc (cfg (not (feature = "single_opt"))))]
     parent : Option<WindowHandle>,
 
     /// Frame properties for [Window].
     frame : WindowFrame,
 
     /// Subwindow properties for [Window].
-    sub : SubWindow,
+    #[cfg (any (doc , not (feature = "single_opt")))]
+    #[cfg_attr (docsrs , doc (cfg (not (feature = "single_opt"))))]
+    sub : crate::sub::SubWindow,
 
     /// Keyboard properties for [Window].
     keyboard : WindowKeyboard,
@@ -123,24 +127,49 @@ impl WindowBuilder {
 
     /// Create a new [WindowBuilder] instance with default parameters. See 
     pub fn new() -> WindowBuilder {
-        WindowBuilder { 
-            icon : None,
-            title: WB_DEFAULT_TITLE.to_string(), 
-            min_size : WB_DEFAULT_MIN_SIZE,
-            max_size : WB_DEFAULT_MAX_SIZE,
-            size: WB_DEFAULT_SIZE, 
-            position: WB_DEFAULT_POSITION, 
-            parent: WB_DEFAULT_PARENT, 
-            sub : SubWindow::new(),
-            keyboard: WindowKeyboard::new(), 
-            pointer: WindowPointer::new(), 
-            frame: WindowFrame::new(),
-            fsmode: WB_DEFAULT_FSMODE,
-            minimized: WB_DEFAULT_MINIMIZED,
-            maximized: WB_DEFAULT_MAXIMIZED, 
-            visible : WB_DEFAULT_VISIBLE,
-            taskbar : WB_DEFAULT_TASKBAR,
+
+        match_cfg! {
+            single_opt:ft => {  // Single Opt has no parent or subwindow properties
+                WindowBuilder { 
+                    icon : None,
+                    title: WB_DEFAULT_TITLE.to_string(), 
+                    min_size : WB_DEFAULT_MIN_SIZE,
+                    max_size : WB_DEFAULT_MAX_SIZE,
+                    size: WB_DEFAULT_SIZE, 
+                    position: WB_DEFAULT_POSITION, 
+                    keyboard: WindowKeyboard::new(), 
+                    pointer: WindowPointer::new(), 
+                    frame: WindowFrame::new(),
+                    fsmode: WB_DEFAULT_FSMODE,
+                    minimized: WB_DEFAULT_MINIMIZED,
+                    maximized: WB_DEFAULT_MAXIMIZED, 
+                    visible : WB_DEFAULT_VISIBLE,
+                    taskbar : WB_DEFAULT_TASKBAR,
+                }
+            },
+            _ => {
+                WindowBuilder { 
+                    icon : None,
+                    title: WB_DEFAULT_TITLE.to_string(), 
+                    min_size : WB_DEFAULT_MIN_SIZE,
+                    max_size : WB_DEFAULT_MAX_SIZE,
+                    size: WB_DEFAULT_SIZE, 
+                    position: WB_DEFAULT_POSITION, 
+                    parent: WB_DEFAULT_PARENT, 
+                    sub : crate::sub::SubWindow::new(),
+                    keyboard: WindowKeyboard::new(), 
+                    pointer: WindowPointer::new(), 
+                    frame: WindowFrame::new(),
+                    fsmode: WB_DEFAULT_FSMODE,
+                    minimized: WB_DEFAULT_MINIMIZED,
+                    maximized: WB_DEFAULT_MAXIMIZED, 
+                    visible : WB_DEFAULT_VISIBLE,
+                    taskbar : WB_DEFAULT_TASKBAR,
+                }
+            }
         }
+
+        
     }
 
     /// Set the [Window] title of the new [Window].
@@ -234,11 +263,11 @@ impl WindowBuilder {
 
     /// [SubWindow] properties of the new [Window].
     #[meta_cfg(!single_opt:ft)]
-    pub fn subwindow(&mut self, sub : SubWindow) -> &mut Self {
+    pub fn subwindow(&mut self, sub : crate::sub::SubWindow) -> &mut Self {
         self.sub = sub;
         self
     }   
-   
+    
     /// Set the [Window] fullscreen mode. This mode is applied when [Window] is showed.
     pub fn fullscreen(&mut self, fsmode : Option<WindowFullScreenMode>) -> &mut Self {
         self.fsmode = fsmode;
@@ -283,7 +312,7 @@ impl WindowBuilder {
         match_cfg! {
             !single_opt:ft => {
                 self.parent = WB_DEFAULT_PARENT;
-                self.sub = SubWindow::new();
+                self.sub = crate::sub::SubWindow::new();
             },
             _ => {}
         }

@@ -101,6 +101,7 @@ fn window_gwdp_display_center() {
 }
 
 /// Window::get_window_desktop_position() -> WindowRelativePosition::Parent
+#[nscfg::meta_cfg(!single_opt:ft)]
 #[test]
 fn window_gwdp_parent() {
     let displays : Rc<Displays> = Rc::new(create_displays(true));
@@ -124,6 +125,7 @@ fn window_gwdp_parent() {
 }
 
 /// Window::get_window_desktop_position() -> WindowRelativePosition::ParentCenter
+#[nscfg::meta_cfg(!single_opt:ft)]
 #[test]
 fn window_gwdp_parent_center() {
     let displays : Rc<Displays> = Rc::new(create_displays(true));
@@ -218,22 +220,27 @@ fn window_gwdp_oob() {
         Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
     }
 
-    // Parent
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MIN / 2, 0)), pps, true) {
-        Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
-        Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
-    }
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MAX / 2, 0)), pps, true) {
-        Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
-        Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
-    }
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MIN / 2)), pps, true) {
-        Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
-        Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
-    }
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MAX / 2)), pps, true) {
-        Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
-        Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+    nscfg::match_cfg! {
+        !single_opt:ft => {
+            // Parent
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MIN / 2, 0)), pps, true) {
+                Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+                Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+            }
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MAX / 2, 0)), pps, true) {
+                Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+                Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+            }
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MIN / 2)), pps, true) {
+                Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+                Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+            }
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MAX / 2)), pps, true) {
+                Ok(_) => assert!(false, "Expected Err(WindowError::WindowRelativePositionOOB)"),
+                Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+            }
+        },
+        _ => {}
     }
 
     // V2 | WindowError::WindowRelativePositionOOB unchecked for each type with position.
@@ -273,22 +280,27 @@ fn window_gwdp_oob() {
         Err(_) => assert!(false, "Should not be OOB"),
     }
 
-    // Parent
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MIN / 2, 0)), pps, false) {
-        Ok(_) => assert!(true),
-        Err(_) => assert!(false, "Should not be OOB"),
-    }
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MAX / 2, 0)), pps, false) {
-        Ok(_) => assert!(true),
-        Err(_) => assert!(false, "Should not be OOB"),
-    }
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MIN / 2)), pps, false) {
-        Ok(_) => assert!(true),
-        Err(_) => assert!(false, "Should not be OOB"),
-    }
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MAX / 2)), pps, false) {
-        Ok(_) => assert!(true),
-        Err(_) => assert!(false, "Should not be OOB"),
+    nscfg::match_cfg! {
+        !single_opt:ft => {
+            // Parent
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MIN / 2, 0)), pps, false) {
+                Ok(_) => assert!(true),
+                Err(_) => assert!(false, "Should not be OOB"),
+            }
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(i32::MAX / 2, 0)), pps, false) {
+                Ok(_) => assert!(true),
+                Err(_) => assert!(false, "Should not be OOB"),
+            }
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MIN / 2)), pps, false) {
+                Ok(_) => assert!(true),
+                Err(_) => assert!(false, "Should not be OOB"),
+            }
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Parent(WindowPosition::new(0, i32::MAX / 2)), pps, false) {
+                Ok(_) => assert!(true),
+                Err(_) => assert!(false, "Should not be OOB"),
+            }
+        },
+        _ => {}
     }
 
 }
@@ -355,34 +367,39 @@ fn window_gwdp_limit() {
         Err(err) => assert!(err == WindowError::DisplayInvalidHandle),
     }
 
-    // WindowRelativePosition::Parent
+    nscfg::match_cfg! {
+        !single_opt:ft => {
+            // WindowRelativePosition::Parent
+            // Checked
+            let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
+            match Window::get_window_desktop_position(size, displays.clone(), position, pps, true) {
+                Ok(_) => assert!(false),
+                Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+            }
 
-    // Checked
-    let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
-    match Window::get_window_desktop_position(size, displays.clone(), position, pps, true) {
-        Ok(_) => assert!(false),
-        Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
-    }
+            // UnChecked
+            let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
+            match Window::get_window_desktop_position(size, displays.clone(), position, pps, false) {
+                Ok(position) => assert_position(&position, 450, 275),
+                Err(_) => assert!(false),
+            }
 
-    // UnChecked
-    let position = WindowRelativePosition::Parent(WindowPosition { x: 50, y: 125 });
-    match Window::get_window_desktop_position(size, displays.clone(), position, pps, false) {
-        Ok(position) => assert_position(&position, 450, 275),
-        Err(_) => assert!(false),
-    }
+            // WindowRelativePosition::ParentCenter
+            // Checked
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, pps, true) {
+                Ok(_) => assert!(false),
+                Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+            }
 
-    // WindowRelativePosition::ParentCenter
-    // Checked
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, pps, true) {
-        Ok(_) => assert!(false),
-        Err(err) => assert!(err == WindowError::WindowRelativePositionOOB),
+            // UnChecked
+            match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, pps, false) {
+                Ok(position) => assert_position(&position, 512, 234),
+                Err(_) => assert!(false),
+            }
+        },
+        _ => {}
     }
-
-    // UnChecked
-    match Window::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::ParentCenter, pps, false) {
-        Ok(position) => assert_position(&position, 512, 234),
-        Err(_) => assert!(false),
-    }
+    
 
     // WindowRelativePosition::Primary
     // Checked

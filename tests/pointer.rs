@@ -1,5 +1,4 @@
-MIT License
-
+/* 
 Copyright (c) 2024  NickelAnge.Studio 
 Email               mathieu.grenier@nickelange.studio
 Git                 https://github.com/NickelAngeStudio/nswindow
@@ -21,3 +20,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+//! WindowPointer integration test.
+//! Testing each update manually
