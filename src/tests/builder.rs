@@ -52,7 +52,7 @@ fn test_defaults(wb : &WindowBuilder) {
     let wkb = WindowKeyboard::new();
     let wp = WindowPointer::new();
     let wf = WindowFrame::new();
-    let sub = crate::sub::SubWindow::new();
+    
 
     assert!(wb.icon == None);
     assert!(wb.title == WB_DEFAULT_TITLE.to_string());
@@ -63,6 +63,7 @@ fn test_defaults(wb : &WindowBuilder) {
 
     nscfg::match_cfg! {
         !single_opt:ft => {
+            let sub = crate::sub::SubWindow::new();
             assert!(wb.sub == sub);
             assert!(wb.parent == WB_DEFAULT_PARENT);
         }, 

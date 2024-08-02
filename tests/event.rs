@@ -22,7 +22,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
-
-// Tests features
-// event_ts
+//! Event integration tests
+//! Testing each event manually

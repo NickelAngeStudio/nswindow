@@ -35,7 +35,9 @@ use std::rc::Rc;
 
 use nscfg::meta_cfg;
 
-use crate::{ display::{Desktop, DisplayHandle, DisplayResolution, Displays}, frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, sub::SubWindow, WindowBuilder, WindowError};
+use crate::{ display::{Desktop, DisplayHandle, DisplayResolution, Displays}, frame::WindowFrame, keyboard::WindowKeyboard, pointer::WindowPointer, WindowBuilder, WindowError};
+
+
 
 /// Window handle used by the [WindowManager](crate::WindowManager).
 /// 
@@ -157,7 +159,7 @@ pub struct Window {
     /// [SubWindow] properties
     #[cfg(any(doc, not(feature = "single_opt")))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "single_opt"))))]
-    pub(crate) sub : Option<SubWindow>,
+    pub(crate) sub : Option<crate::sub::SubWindow>,
 
     /// [Window] frame properties.
     pub(crate) frame : WindowFrame,
@@ -515,6 +517,7 @@ impl Window {
     fn set_window_position(&mut self, position : WindowRelativePosition, check_oob : bool) -> Result<WindowPosition, WindowError> {
 
         match match &position {
+            #[cfg (any (doc , not (feature = "single_opt")))]
             WindowRelativePosition::Parent(_) | WindowRelativePosition::ParentCenter => {
                 match self.parent {
                     Some(parent) => Self::get_window_desktop_position(self.size, self.displays.clone(), 
@@ -574,6 +577,7 @@ impl Window {
             } else {
                 Err(WindowError::DisplayInvalidHandle)
             },
+            #[cfg (any (doc , not (feature = "single_opt")))]
             WindowRelativePosition::Parent(position) => match pps {
                 Some(pps) => {
                     Ok(WindowPosition { x: position.x + pps.0.x, y: position.y + pps.0.y })
@@ -581,6 +585,7 @@ impl Window {
                 // No parent is returned to desktop
                 None => Self::get_window_desktop_position(size, displays.clone(), WindowRelativePosition::Desktop(position), None, check_oob),
             },
+            #[cfg (any (doc , not (feature = "single_opt")))]
             WindowRelativePosition::ParentCenter => match pps {
                 Some(pps) => {
                     let position = WindowPosition { x: ((pps.1.width as i32 - size.width as i32) / 2) as i32, y: ((pps.1.height as i32 - size.height as i32) / 2) as i32 };
